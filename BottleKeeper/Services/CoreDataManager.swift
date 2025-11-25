@@ -109,8 +109,8 @@ class CoreDataManager: ObservableObject {
             UserDefaults.standard.removeObject(forKey: CoreDataConstants.UserDefaultsKeys.cloudKitSchemaInitialized)
             UserDefaults.standard.removeObject(forKey: CoreDataConstants.UserDefaultsKeys.cloudKitSchemaInitializedDate)
             UserDefaults.standard.set(expectedContainerID, forKey: "cloudKitContainerID")
-            log("🔄 CloudKit container changed from \(currentContainerID ?? "nil") to \(expectedContainerID)")
-            log("🔄 UserDefaults cleared for new schema initialization")
+            print("🔄 CloudKit container changed from \(currentContainerID ?? "nil") to \(expectedContainerID)")
+            print("🔄 UserDefaults cleared for new schema initialization")
         }
         #endif
 
