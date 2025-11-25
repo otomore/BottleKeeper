@@ -80,12 +80,17 @@ jobs:
           xcrun simctl spawn "$SIMULATOR_ID" log stream --predicate 'process == "BottleKeeper"' --level debug > system.log 2>&1 &
           LOG_PID=$!
 
-          # アプリを起動（フォアグラウンドでtimeout使用）
+          # アプリを起動（バックグラウンドで60秒実行 - macOS互換）
           echo "🚀 アプリを起動します（60秒間実行）..."
-          timeout 60s xcrun simctl launch --console "$SIMULATOR_ID" com.bottlekeep.whiskey > app.log 2>&1 || {
-            EXIT_CODE=$?
-            echo "⚠️ アプリがtimeoutまたはエラーで終了しました（exit code: $EXIT_CODE）"
-          }
+          xcrun simctl launch --console "$SIMULATOR_ID" com.bottlekeep.whiskey > app.log 2>&1 &
+          APP_PID=$!
+          echo "ℹ️ アプリプロセスID: $APP_PID"
+
+          # 60秒待機してから終了
+          sleep 60
+
+          # アプリプロセスを停止
+          kill $APP_PID 2>/dev/null || echo "ℹ️ アプリは既に終了しています"
 
           # ログストリーミングを停止
           kill $LOG_PID 2>/dev/null || true
