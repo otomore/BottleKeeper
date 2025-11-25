@@ -51,7 +51,7 @@
 
 ## 2. iCloud同期問題（`_pcs_data`欠落） ⚠️ 検証必要
 
-### 📊 現状分析（2025-11-26確認）
+### 📊 現状分析（2025-11-26更新）
 
 **CloudKitダッシュボード確認結果**:
 - コンテナ: `iCloud.com.bottlekeep.whiskey.v2`
@@ -64,12 +64,24 @@
   - ❌ **CD_WishlistItem**: 欠落
   - ❌ **`_pcs_data`**: **欠落（最重要）**
 
-**GitHub Actions Run #18432219295の結果**:
+**GitHub Actions Run #19677636369の結果（2025-11-26）**:
 - ✅ DEBUGビルド成功
-- ✅ シミュレーター起動成功
-- ✅ アプリ起動成功（60秒実行）
-- ❌ CloudKitログが一切出力されず
-- ❌ スキーマ初期化が実行されなかった
+- ✅ シミュレーターリセット成功
+- ✅ アプリインストール成功
+- ✅ Swiftコンパイルエラー解消（log→print修正）
+- ❌ **アプリ起動ログが一切出力されず**
+- ❌ **`found nothing to terminate` エラー → アプリが起動していない**
+- ❌ CloudKitスキーマ初期化が実行されなかった
+
+**診断結果（Ultrathink分析）**:
+- **根本原因**: ログキャプチャ方法の問題
+  - `xcrun simctl launch --console` の出力がバッファリングされ、`tee` で `simulator.log` に書き込まれない
+  - バックグラウンドプロセスとして実行後、60秒でkillするため、バッファがフラッシュされる前に終了
+  - 実際にアプリが起動したかどうかも不明
+- **可能性のある二次的問題**:
+  - GitHub Actionsシミュレーターが **iCloudにサインインしていない**
+  - CloudKitはApple IDなしではDevelopment環境にアクセスできない可能性
+  - DEBUGビルドで `CODE_SIGNING_REQUIRED=NO` だが、CloudKitは署名が必要な可能性
 
 ### 🧠 根本原因分析（Ultrathink）
 
@@ -116,9 +128,31 @@ if currentContainerID != expectedContainerID {
 
 ### 🎯 解決策
 
-#### 解決策A: GitHub Actionsでシミュレーターリセット（推奨）
+#### 解決策A: ログキャプチャ方法の改善（実装済み - 2025-11-26）
 
-**`.github/workflows/ios-build.yml`に追加**:
+**`.github/workflows/ios-build.yml`に実装済み**:
+
+```yaml
+# 新しい診断機能
+- インストール済みアプリ確認: xcrun simctl listapps
+- システムログストリーミング: log stream --predicate 'process == "BottleKeeper"'
+- timeout使用: フォアグラウンドで60秒実行し、バッファリング問題を回避
+- スクリーンショット撮影: 起動状態を視覚的に確認
+- クラッシュログ確認: ~/Library/Logs/DiagnosticReports/
+- ログファイルアーティファクト: app.log, system.log, screenshot.png をアップロード
+```
+
+**期待される効果**:
+- アプリが実際に起動しているか確認可能
+- クラッシュした場合の詳細なエラー情報を取得
+- CloudKitスキーマ初期化のログを正確にキャプチャ
+- 視覚的にGUI状態を確認
+
+**次回Run（#221以降）で検証予定**
+
+#### 解決策B: GitHub Actionsでシミュレーターリセット（実装済み）
+
+**`.github/workflows/ios-build.yml`に実装済み**:
 
 ```yaml
 # シミュレーター起動前
@@ -135,31 +169,26 @@ if currentContainerID != expectedContainerID {
 - 確実にクリーンな環境でスキーマ初期化を実行
 - コード変更不要
 
-**デメリット**:
-- ビルド時間が若干増加（数秒）
+**ステータス**: ✅ 実装完了
 
-#### 解決策B: print()をlog()に変更（補助的）
+#### 解決策C: print()でコンテナ変更を検知（実装済み）
 
-**CoreDataManager.swift line 112-113を修正**:
+**CoreDataManager.swift line 112-113を修正済み**:
 
 ```swift
-// 変更前
-print("🔄 CloudKit container changed to \(expectedContainerID)")
+// init()内では log() の代わりに print() を使用（Swift初期化順序制約のため）
+print("🔄 CloudKit container changed from \(currentContainerID ?? "nil") to \(expectedContainerID)")
 print("🔄 UserDefaults cleared for new schema initialization")
-
-// 変更後
-log("🔄 CloudKit container changed to \(expectedContainerID)")
-log("🔄 UserDefaults cleared for new schema initialization")
 ```
 
-**メリット**:
-- ログが確実にキャプチャされる
-- デバッグ情報が増える
+**理由**:
+- `log()` は `self.logger` にアクセスするため、`self` が完全初期化される前に使用不可
+- `print()` はグローバル関数なので初期化中でも使用可能
+- GitHub Actions Run #19677523106のSwiftコンパイルエラーを解消
 
-**デメリット**:
-- 根本解決にはならない
+**ステータス**: ✅ 実装完了
 
-#### 解決策C: プロビジョニングプロファイル更新（必須）
+#### 解決策D: プロビジョニングプロファイル更新（未実施・必須）
 
 **現在の問題** (GitHub Actions Run #18432219295で確認):
 ```
@@ -181,29 +210,41 @@ file's value for the com.apple.developer.icloud-container-identifiers entitlemen
 
 #### ステップ1: GitHub Actionsワークフロー修正
 
-- [x] CFBundleVersion自動更新機能を追加
-- [ ] シミュレーターリセット機能を追加（解決策A）
-- [ ] ログ収集方法を改善（`2>&1`で標準エラーもキャプチャ）
+- [x] CFBundleVersion自動更新機能を追加（Run #220で動作確認済み）
+- [x] シミュレーターリセット機能を追加（解決策B）
+- [x] ログ収集方法を根本的に改善（解決策A）:
+  - [x] システムログストリーミング (`log stream`)
+  - [x] `timeout` でフォアグラウンド実行
+  - [x] スクリーンショット撮影
+  - [x] クラッシュログ確認
+  - [x] ログファイルアーティファクトアップロード
 
-#### ステップ2: コード修正（オプション）
+#### ステップ2: コード修正
 
-- [ ] CoreDataManager.swift: `print()`を`log()`に変更（解決策B）
+- [x] CoreDataManager.swift: `log()` → `print()` に変更（解決策C、Swift初期化順序エラー解消）
 
-#### ステップ3: プロビジョニングプロファイル更新（必須）
+#### ステップ3: プロビジョニングプロファイル更新（未実施・必須）
 
 - [ ] Apple Developer Portalでプロファイル更新
 - [ ] 新プロファイルをダウンロード
 - [ ] GitHub Secrets更新
 
-#### ステップ4: 検証
+#### ステップ4: 検証（次回Run #221以降で実施）
 
-- [ ] GitHub Actionsを手動実行
-- [ ] シミュレーターログで以下を確認:
-  - `🔄 CloudKit container changed to iCloud.com.bottlekeep.whiskey.v2`
+- [ ] GitHub Actionsで次回ビルドを実行
+- [ ] 新しいログキャプチャ方法で詳細なログを確認:
+  - [ ] `app.log`: アプリ起動ログを確認
+  - [ ] `system.log`: システムログからCloudKit関連メッセージを確認
+  - [ ] `screenshot.png`: アプリのGUI状態を視覚的に確認
+  - [ ] クラッシュログ: アプリがクラッシュしていないか確認
+- [ ] アプリが正常に起動しているか確認
+- [ ] CloudKitログで以下を確認:
+  - `🔄 CloudKit container changed from nil to iCloud.com.bottlekeep.whiskey.v2`
+  - `🔄 UserDefaults cleared for new schema initialization`
   - `🔄 Attempting automatic schema initialization...`
   - `✅ CloudKit schema initialized successfully`
 - [ ] CloudKitダッシュボードで`_pcs_data`の存在を確認
-- [ ] ビルドジョブが成功することを確認（プロファイル問題解決）
+- [ ] ビルドジョブが成功することを確認
 
 #### ステップ5: Production展開
 

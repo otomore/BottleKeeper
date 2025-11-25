@@ -67,40 +67,90 @@ jobs:
           APP_PATH=$(find $RUNNER_TEMP/DerivedData -name "BottleKeeper.app" | head -n 1)
           xcrun simctl install "$SIMULATOR_ID" "$APP_PATH"
 
+          # インストール済みアプリを確認
+          echo "📋 インストール済みアプリを確認中..."
+          xcrun simctl listapps "$SIMULATOR_ID" | grep -i bottlekeep || echo "⚠️ BottleKeeperが見つかりません"
+
           # アプリを起動してCloudKitスキーマ初期化を実行
           echo "🚀 アプリを起動中（CloudKitスキーマ初期化のため）..."
           echo "ℹ️ DEBUGビルドでは、CoreDataManagerが自動的にスキーマ初期化を試行します"
 
-          # シミュレーターログをリアルタイムで取得するために、別プロセスで起動
-          xcrun simctl launch --console "$SIMULATOR_ID" com.bottlekeep.whiskey 2>&1 | tee simulator.log &
-          LAUNCH_PID=$!
+          # システムログストリーミングを開始（バックグラウンド）
+          echo "📡 システムログストリーミングを開始..."
+          xcrun simctl spawn "$SIMULATOR_ID" log stream --predicate 'process == "BottleKeeper"' --level debug > system.log 2>&1 &
+          LOG_PID=$!
 
-          # 60秒待機（スキーマ初期化が完了するまで）
-          # 以前の30秒では不十分だった可能性があるため、60秒に延長
-          echo "⏳ CloudKitスキーマ初期化完了を待機中（60秒）..."
-          sleep 60
+          # アプリを起動（フォアグラウンドでtimeout使用）
+          echo "🚀 アプリを起動します（60秒間実行）..."
+          timeout 60s xcrun simctl launch --console "$SIMULATOR_ID" com.bottlekeep.whiskey > app.log 2>&1 || {
+            EXIT_CODE=$?
+            echo "⚠️ アプリがtimeoutまたはエラーで終了しました（exit code: $EXIT_CODE）"
+          }
 
-          # ログから重要なメッセージを抽出
-          echo "📋 シミュレーターログから重要なメッセージを抽出中..."
-          if [ -f simulator.log ]; then
-            echo "=== スキーマ初期化関連ログ ==="
-            grep -i "cloudkit\|schema\|_pcs_data\|error 134060\|initialized" simulator.log || echo "関連ログが見つかりませんでした"
+          # ログストリーミングを停止
+          kill $LOG_PID 2>/dev/null || true
+          sleep 2 # ログバッファをフラッシュ
+
+          # スクリーンショットを撮影（起動状態を確認）
+          echo "📸 スクリーンショットを撮影中..."
+          xcrun simctl io "$SIMULATOR_ID" screenshot screenshot.png || true
+
+          # 全てのログファイルを確認
+          echo "📋 ログファイル一覧:"
+          ls -lh *.log screenshot.png 2>/dev/null || echo "ログファイルが見つかりません"
+
+          # アプリログから重要なメッセージを抽出
+          echo ""
+          echo "=== アプリ起動ログ（app.log）==="
+          if [ -f app.log ] && [ -s app.log ]; then
+            cat app.log
+          else
+            echo "⚠️ app.logが空または存在しません"
+          fi
+
+          # システムログからCloudKit関連を抽出
+          echo ""
+          echo "=== システムログ（CloudKit関連）==="
+          if [ -f system.log ] && [ -s system.log ]; then
+            grep -i "cloudkit\|schema\|_pcs_data\|error\|initialized\|container" system.log || echo "CloudKit関連ログが見つかりませんでした"
+          else
+            echo "⚠️ system.logが空または存在しません"
+          fi
+
+          # クラッシュログを確認
+          echo ""
+          echo "=== クラッシュログ確認 ==="
+          CRASH_LOGS=$(find ~/Library/Logs/DiagnosticReports -name "BottleKeeper*.crash" -o -name "BottleKeeper*.ips" 2>/dev/null | head -5)
+          if [ -n "$CRASH_LOGS" ]; then
+            echo "⚠️ クラッシュログが見つかりました:"
+            echo "$CRASH_LOGS"
+            for log in $CRASH_LOGS; do
+              echo "--- $(basename $log) ---"
+              head -50 "$log"
+            done
+          else
+            echo "✅ クラッシュログは見つかりませんでした"
           fi
 
           # アプリを終了
+          echo ""
           echo "🛑 アプリを終了中..."
           xcrun simctl terminate "$SIMULATOR_ID" com.bottlekeep.whiskey || true
-          kill $LAUNCH_PID 2>/dev/null || true
 
           echo "✅ CloudKitスキーマ初期化プロセス完了（Development環境）"
           echo "ℹ️ CloudKit Dashboardでスキーマが正しく作成されたか確認してください"
 
-      - name: テスト結果をアップロード
+      - name: シミュレーターログとスクリーンショットをアップロード
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results
-          path: TestResults
+          name: simulator-logs
+          path: |
+            app.log
+            system.log
+            screenshot.png
+            ~/Library/Logs/DiagnosticReports/BottleKeeper*
+          if-no-files-found: warn
 
   # ビルドジョブ
   build:
