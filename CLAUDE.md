@@ -56,6 +56,34 @@ Claude Code は以下のルールに従ってください：
 - プロビジョニングプロファイルはApple Developer Portal（Web）で管理
 - すべての設定変更はファイル編集で実施（Xcode GUI不要）
 
+### Playwrightブラウザ常時表示ルール
+
+**開発作業開始時は、以下のページをPlaywrightブラウザで開いておくこと**:
+
+1. **CloudKit Dashboard** (Development環境)
+   - URL: https://icloud.developer.apple.com/dashboard/
+   - Container: `iCloud.com.bottlekeep.whiskey.v2`
+   - Environment: `Development` → `Production`（段階に応じて切り替え）
+   - 用途: スキーマ確認、レコードタイプ確認、ログ確認
+
+2. **Apple Developer Portal - CloudKit Containers**
+   - URL: https://developer.apple.com/account/resources/identifiers/list/cloudContainer
+   - 用途: CloudKitコンテナ管理、新規作成
+
+3. **Apple Developer Portal - Provisioning Profiles**
+   - URL: https://developer.apple.com/account/resources/profiles/list
+   - 用途: プロビジョニングプロファイル管理、更新、ダウンロード
+
+4. **GitHub Actions**
+   - URL: https://github.com/otomore/BottleKeeper/actions
+   - 用途: ビルド状況確認、ログ確認、手動実行
+
+5. **App Store Connect**
+   - URL: https://appstoreconnect.apple.com/
+   - 用途: TestFlightビルド確認、配信状況確認
+
+**理由**: これらのページを常時開いておくことで、作業効率が大幅に向上し、状況確認がリアルタイムで可能になる。
+
 ### CloudKit関連の重要ファイル
 
 **変更時は必ずセットで更新**:

@@ -2,8 +2,8 @@ name: iOS アプリビルド
 
 # トリガー設定
 on:
-  # push:
-  #   branches: [ main, develop ]
+  push:
+    branches: [ main ]  # mainブランチへのpushでビルドを自動実行（フェーズA）
   pull_request:
     branches: [ main ]
   workflow_dispatch: # 手動実行を許可
@@ -285,12 +285,12 @@ jobs:
           # プロビジョニングプロファイルを削除
           rm -f ~/Library/MobileDevice/Provisioning\ Profiles/build_pp.mobileprovision || true
 
-  # TestFlight配信ジョブ（オプション）
+  # TestFlight配信ジョブ（手動実行のみ - フェーズA）
   deploy-testflight:
     name: TestFlightへ配信
     runs-on: macos-14 # iOS 26 Beta問題を回避するためmacOS-14を使用
     needs: build
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch'  # フェーズA: 手動実行のみ（自動配信はテスト後に有効化）
 
     steps:
       - name: リポジトリをチェックアウト
