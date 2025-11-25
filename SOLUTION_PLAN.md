@@ -64,24 +64,25 @@
   - ❌ **CD_WishlistItem**: 欠落
   - ❌ **`_pcs_data`**: **欠落（最重要）**
 
-**GitHub Actions Run #19677636369の結果（2025-11-26）**:
+**GitHub Actions Run #19678682118の結果（2025-11-26 - 最新）**:
 - ✅ DEBUGビルド成功
 - ✅ シミュレーターリセット成功
 - ✅ アプリインストール成功
 - ✅ Swiftコンパイルエラー解消（log→print修正）
-- ❌ **アプリ起動ログが一切出力されず**
-- ❌ **`found nothing to terminate` エラー → アプリが起動していない**
-- ❌ CloudKitスキーマ初期化が実行されなかった
+- ✅ **`timeout`コマンド問題解決（macOS互換の実装に修正）**
+- ✅ **アプリが正常に起動（プロセスID: 13372）**
+- ✅ **ログが正しく生成（app.log: 30B, system.log: 31KB, screenshot.png: 3.7MB）**
+- ❌ **CloudKitスキーマ初期化が実行されなかった**
+- ❌ **Entitlementエラー: `com.apple.developer.icloud-services` entitlement required**
 
-**診断結果（Ultrathink分析）**:
-- **根本原因**: ログキャプチャ方法の問題
-  - `xcrun simctl launch --console` の出力がバッファリングされ、`tee` で `simulator.log` に書き込まれない
-  - バックグラウンドプロセスとして実行後、60秒でkillするため、バッファがフラッシュされる前に終了
-  - 実際にアプリが起動したかどうかも不明
-- **可能性のある二次的問題**:
-  - GitHub Actionsシミュレーターが **iCloudにサインインしていない**
-  - CloudKitはApple IDなしではDevelopment環境にアクセスできない可能性
-  - DEBUGビルドで `CODE_SIGNING_REQUIRED=NO` だが、CloudKitは署名が必要な可能性
+**根本原因判明**:
+- **DEBUGビルドで`CODE_SIGNING_REQUIRED=NO`を使用しているため、entitlementsが適用されない**
+- CloudKitはentitlementsなしではアクセスできない
+- エラーログ: `In order to use CloudKit, your process must have a com.apple.developer.icloud-services entitlement`
+
+**結論**:
+- GitHub ActionsのDEBUGビルド（署名なし）ではCloudKitスキーマ初期化は不可能
+- **解決策**: ローカルMacのXcodeシミュレーターまたはTestFlight実機でスキーマ初期化を実行
 
 ### 🧠 根本原因分析（Ultrathink）
 
