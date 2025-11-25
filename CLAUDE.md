@@ -101,6 +101,26 @@ Claude Code は以下のルールに従ってください：
 - **Team ID**: `B3QHWZX47Z`
 - **環境**: Development（初期スキーマ生成中）→ Production（デプロイ予定）
 
+### TestFlight自動配信の設定
+
+**コンプライアンス設定の自動化**:
+- `Info.plist`に`ITSAppUsesNonExemptEncryption`キーを`false`に設定済み
+- HTTPSのみを使用するアプリは暗号化免除対象のため、`false`が適切
+- 参考: https://developer.apple.com/documentation/bundleresources/information-property-list/itsappusesnonexemptencryption
+
+**Fastlaneによる自動配信**:
+- `fastlane/Fastfile`の`upload_to_testflight`で以下のパラメータを設定:
+  - `skip_waiting_for_build_processing: false` - ビルド処理完了を待つ（必須）
+  - `skip_submission: false` - 自動提出を有効化
+  - `groups: ["tester"]` - 内部テスターグループ「tester」に自動配信
+  - `distribute_external: false` - 外部テスターには配布しない
+- この設定により、GitHub Actionsからpush時に自動的にテスターグループへ配信される
+
+**重要な注意点**:
+- `skip_waiting_for_build_processing: true`の場合、グループへの自動配信は機能しない
+- ビルド処理の完了を待つ必要があるため、CI/CD実行時間が約10-15分増加する
+- 内部テスターグループ「tester」は事前にApp Store Connectで作成済み
+
 ---
 
 この設定により、このプロジェクトにおけるClaude Codeとのやり取りは継続的に日本語で行われます。

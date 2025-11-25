@@ -23,10 +23,11 @@ platform :ios do
     upload_to_testflight(
       api_key: api_key,
       ipa: ipa_path,
-      skip_waiting_for_build_processing: true, # ビルド処理の完了を待たない
-      skip_submission: true, # 自動提出をスキップ
-      distribute_external: false, # 外部テスターには配布しない
-      notify_external_testers: false
+      skip_waiting_for_build_processing: false, # ビルド処理の完了を待つ（グループ配信に必要）
+      skip_submission: false, # 自動提出を有効化
+      distribute_external: false, # 外部テスターには配布しない（内部グループのみ）
+      notify_external_testers: false,
+      groups: ["tester"] # 内部テスターグループ「tester」に自動配信
     )
 
     UI.success("🎉 TestFlightへのアップロードが完了しました！")
