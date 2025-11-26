@@ -213,6 +213,9 @@ class CoreDataManager: ObservableObject {
 
             // iCloudが利用可能な場合、メインスレッドでスキーマ初期化を実行
             DispatchQueue.main.async {
+                // iCloudAvailableフラグを更新（initializeCloudKitSchema内のisCloudSyncAvailableチェックのため）
+                self.iCloudAvailable = true
+
                 self.log("🔄 Attempting automatic schema initialization...")
                 do {
                     try self.initializeCloudKitSchema()
