@@ -100,8 +100,7 @@ class CoreDataManager: ObservableObject {
     }
 
     init(inMemory: Bool = false) {
-        // 一時的: 新しいCloudKitコンテナへの移行のためUserDefaultsをクリア
-        #if DEBUG
+        // CloudKitコンテナ変更検知（RELEASE環境でも動作する必要がある）
         let currentContainerID = UserDefaults.standard.string(forKey: "cloudKitContainerID")
         let expectedContainerID = CoreDataConstants.cloudKitContainerIdentifier
 
@@ -109,10 +108,11 @@ class CoreDataManager: ObservableObject {
             UserDefaults.standard.removeObject(forKey: CoreDataConstants.UserDefaultsKeys.cloudKitSchemaInitialized)
             UserDefaults.standard.removeObject(forKey: CoreDataConstants.UserDefaultsKeys.cloudKitSchemaInitializedDate)
             UserDefaults.standard.set(expectedContainerID, forKey: "cloudKitContainerID")
+            #if DEBUG
             print("🔄 CloudKit container changed from \(currentContainerID ?? "nil") to \(expectedContainerID)")
             print("🔄 UserDefaults cleared for new schema initialization")
+            #endif
         }
-        #endif
 
         container = NSPersistentCloudKitContainer(name: CoreDataConstants.containerName)
 
