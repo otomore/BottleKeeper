@@ -182,9 +182,8 @@ class CoreDataManager: ObservableObject {
 
                 // ストアロード完了後にスキーマ初期化を試行（一度だけ）
                 // これは、Development環境で_pcs_dataシステムレコードタイプを生成するために必要
-                #if DEBUG
+                // 注意: RELEASEビルドでも実行する必要がある（TestFlightでのスキーマ初期化のため）
                 self?.attemptSchemaInitializationIfNeeded()
-                #endif
             }
         }
     }
