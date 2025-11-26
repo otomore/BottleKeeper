@@ -180,10 +180,12 @@ class CoreDataManager: ObservableObject {
                 let cloudKitStatus = storeDescription.cloudKitContainerOptions != nil ? "Enabled" : "Disabled"
                 self?.log("CloudKit options: \(cloudKitStatus)")
 
-                // ストアロード完了後にスキーマ初期化を試行（一度だけ）
-                // これは、Development環境で_pcs_dataシステムレコードタイプを生成するために必要
-                // 注意: RELEASEビルドでも実行する必要がある（TestFlightでのスキーマ初期化のため）
+                // ストアロード完了後にスキーマ初期化を試行（DEBUGビルドのみ、一度だけ）
+                // Production環境でスキーマを初期化するには、DEBUGビルドで実機を起動する必要がある
+                // RELEASEビルド（TestFlight等）ではスキーマ初期化APIは使用しない
+                #if DEBUG
                 self?.attemptSchemaInitializationIfNeeded()
+                #endif
             }
         }
     }
@@ -417,8 +419,8 @@ extension CoreDataManager {
             return
         }
 
-        log("🔄 Initializing CloudKit schema...")
-        log("ℹ️ This creates _pcs_data system record type and user-defined record types")
+        log("🔄 Initializing CloudKit schema (Production environment)...")
+        log("ℹ️ This creates record types in CloudKit Production database")
 
         guard isCloudSyncAvailable else {
             let error = NSError(
@@ -433,8 +435,7 @@ extension CoreDataManager {
         // スキーマ初期化を実行
         do {
             try container.initializeCloudKitSchema(options: [])
-            log("✅ CloudKit schema initialized successfully")
-            log("✅ _pcs_data system record type should now be created")
+            log("✅ CloudKit schema initialized successfully in Production")
             log("✅ CD_Bottle, CD_WishlistItem, CD_DrinkingLog, CD_BottlePhoto record types created")
 
             UserDefaults.standard.set(
@@ -458,7 +459,6 @@ extension CoreDataManager {
                 log("  1. CloudKit schema already exists (cannot reinitialize)")
                 log("  2. Stores are not loaded yet")
                 log("  3. CloudKit container options are not properly set")
-                log("ℹ️ If schema exists but _pcs_data is missing, consider creating a new CloudKit container")
             }
 
             // CKErrorの詳細情報を取得
