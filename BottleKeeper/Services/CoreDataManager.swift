@@ -196,18 +196,31 @@ class CoreDataManager: ObservableObject {
             return
         }
 
-        // iCloudが利用可能でない場合はスキップ
-        guard isCloudSyncAvailable else {
-            log("⚠️ iCloud not available, skipping schema initialization")
-            return
-        }
+        // 直接iCloudステータスを確認（非同期チェックの完了を待つため）
+        let ckContainer = CKContainer(identifier: CoreDataConstants.cloudKitContainerIdentifier)
+        ckContainer.accountStatus { [weak self] status, error in
+            guard let self = self else { return }
 
-        log("🔄 Attempting automatic schema initialization...")
-        do {
-            try initializeCloudKitSchema()
-        } catch {
-            log("⚠️ Automatic schema initialization failed: \(error.localizedDescription)")
-            log("ℹ️ This is normal if schema already exists in CloudKit")
+            if let error = error {
+                self.log("❌ iCloud account check error: \(error.localizedDescription)")
+                return
+            }
+
+            guard status == .available else {
+                self.log("⚠️ iCloud not available (status: \(status.rawValue)), skipping schema initialization")
+                return
+            }
+
+            // iCloudが利用可能な場合、メインスレッドでスキーマ初期化を実行
+            DispatchQueue.main.async {
+                self.log("🔄 Attempting automatic schema initialization...")
+                do {
+                    try self.initializeCloudKitSchema()
+                } catch {
+                    self.log("⚠️ Automatic schema initialization failed: \(error.localizedDescription)")
+                    self.log("ℹ️ This is normal if schema already exists in CloudKit")
+                }
+            }
         }
     }
 
