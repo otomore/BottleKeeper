@@ -55,6 +55,8 @@
 		B1B2C3D4E5F6789012345630 /* BottleKeeperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1B2C3D4E5F6789012345631 /* BottleKeeperTests.swift */; };
 		B1B2C3D4E5F6789012345632 /* DrinkingLogServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1B2C3D4E5F6789012345633 /* DrinkingLogServiceTests.swift */; };
 		B1B2C3D4E5F6789012345634 /* StatisticsViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1B2C3D4E5F6789012345635 /* StatisticsViewModelTests.swift */; };
+		B1B2C3D4E5F6789012345670 /* BottleListViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1B2C3D4E5F6789012345671 /* BottleListViewModelTests.swift */; };
+		B1B2C3D4E5F6789012345672 /* SettingsViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1B2C3D4E5F6789012345673 /* SettingsViewModelTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -120,6 +122,8 @@
 		B1B2C3D4E5F6789012345631 /* BottleKeeperTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottleKeeperTests.swift; sourceTree = "<group>"; };
 		B1B2C3D4E5F6789012345633 /* DrinkingLogServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrinkingLogServiceTests.swift; sourceTree = "<group>"; };
 		B1B2C3D4E5F6789012345635 /* StatisticsViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsViewModelTests.swift; sourceTree = "<group>"; };
+		B1B2C3D4E5F6789012345671 /* BottleListViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottleListViewModelTests.swift; sourceTree = "<group>"; };
+		B1B2C3D4E5F6789012345673 /* SettingsViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModelTests.swift; sourceTree = "<group>"; };
 		B1B2C3D4E5F6789012345640 /* BottleKeeperTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BottleKeeperTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -165,6 +169,8 @@
 				B1B2C3D4E5F6789012345631 /* BottleKeeperTests.swift */,
 				B1B2C3D4E5F6789012345633 /* DrinkingLogServiceTests.swift */,
 				B1B2C3D4E5F6789012345635 /* StatisticsViewModelTests.swift */,
+				B1B2C3D4E5F6789012345671 /* BottleListViewModelTests.swift */,
+				B1B2C3D4E5F6789012345673 /* SettingsViewModelTests.swift */,
 			);
 			path = BottleKeeperTests;
 			sourceTree = "<group>";
@@ -459,6 +465,8 @@
 				B1B2C3D4E5F6789012345630 /* BottleKeeperTests.swift in Sources */,
 				B1B2C3D4E5F6789012345632 /* DrinkingLogServiceTests.swift in Sources */,
 				B1B2C3D4E5F6789012345634 /* StatisticsViewModelTests.swift in Sources */,
+				B1B2C3D4E5F6789012345670 /* BottleListViewModelTests.swift in Sources */,
+				B1B2C3D4E5F6789012345672 /* SettingsViewModelTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
