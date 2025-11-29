@@ -6,7 +6,7 @@ import CloudKit
 
 private enum CoreDataConstants {
     static let containerName = "BottleKeeper"
-    static let cloudKitContainerIdentifier = "iCloud.com.bottlekeep.whiskey.v2"
+    static let cloudKitContainerIdentifier = "iCloud.com.bottlekeep.whiskey.v3"
     static let maxLogCount = 100
     static let previewSampleCount = 5
 

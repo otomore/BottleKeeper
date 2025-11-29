@@ -27,6 +27,16 @@ Claude Code は以下のルールに従ってください：
 3. 変更したファイルは必ず個別に `git add <ファイルパス>` で追加する
 4. 複数のファイルを追加する場合も、それぞれ個別にaddコマンドを実行する
 
+## 実行時の厳守事項
+
+- **影響範囲の確認**: 変更を行う前に、意図しない副作用が発生する可能性のある箇所を特定し、影響範囲を明確にしてから作業を実施すること。
+
+- **曖昧な表現の禁止**: 「〜の可能性があります」「〜かもしれません」などの曖昧な表現を使用しない。必ず一次情報（公式ドキュメント、ソースコード等）を根拠とし、根拠となるURLと該当箇所の引用をユーザーに提示すること。
+
+- **独断でのUI変更の禁止**: ユーザーから明示的な指示がない限り、UIのデザインやスタイリングを独自に変更・追加しないこと。
+
+- **エラーの隠蔽の禁止**: 失敗しているテストをskipしたり、削除したり、エラーメッセージを握りつぶすなど、問題を隠蔽する行為を行わないこと。
+
 ---
 
 ## プロジェクト固有の重要な知見
@@ -66,7 +76,7 @@ Claude Code は以下のルールに従ってください：
 
 1. **CloudKit Dashboard** (Development環境)
    - URL: https://icloud.developer.apple.com/dashboard/
-   - Container: `iCloud.com.bottlekeep.whiskey.v2`
+   - Container: `iCloud.com.bottlekeep.whiskey.v3`
    - Environment: `Development` → `Production`（段階に応じて切り替え）
    - 用途: スキーマ確認、レコードタイプ確認、ログ確認
 
@@ -101,7 +111,7 @@ Claude Code は以下のルールに従ってください：
 
 ### 現在のCloudKitコンテナ
 
-- **Container ID**: `iCloud.com.bottlekeep.whiskey.v2`
+- **Container ID**: `iCloud.com.bottlekeep.whiskey.v3`
 - **Team ID**: `B3QHWZX47Z`
 - **環境**: Development（初期スキーマ生成中）→ Production（デプロイ予定）
 
