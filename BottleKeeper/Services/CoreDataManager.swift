@@ -174,12 +174,10 @@ class CoreDataManager: ObservableObject {
                 let cloudKitStatus = storeDescription.cloudKitContainerOptions != nil ? "Enabled" : "Disabled"
                 self?.log("CloudKit options: \(cloudKitStatus)")
 
-                // ストアロード完了後にスキーマ初期化を試行（DEBUGビルドのみ、一度だけ）
-                // Production環境でスキーマを初期化するには、DEBUGビルドで実機を起動する必要がある
-                // RELEASEビルド（TestFlight等）ではスキーマ初期化APIは使用しない
-                #if DEBUG
+                // ストアロード完了後にスキーマ初期化を試行（一度だけ）
+                // 新しいCloudKitコンテナ(v3)のスキーマを初期化するため、一時的にRELEASEでも実行
+                // TODO: スキーマがProductionにデプロイされたら、#if DEBUGガードを復活させる
                 self?.attemptSchemaInitializationIfNeeded()
-                #endif
             }
         }
     }
