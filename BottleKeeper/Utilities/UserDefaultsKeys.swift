@@ -27,9 +27,10 @@ enum UserDefaultsKeys {
     /// CloudKitコンテナID（コンテナ変更検出用）
     static let cloudKitContainerID = "cloudKitContainerID"
 
-    /// CloudKitスキーマ初期化済みフラグ
-    static let cloudKitSchemaInitialized = "cloudKitSchemaInitialized"
+    /// CloudKitスキーマ初期化済みフラグ（v3コンテナ用）
+    /// 注: v2からv3への移行時にキー名を変更し、新しいコンテナのスキーマ初期化を強制
+    static let cloudKitSchemaInitialized = "cloudKitSchemaInitialized_v3"
 
-    /// CloudKitスキーマ初期化日時
-    static let cloudKitSchemaInitializedDate = "cloudKitSchemaInitializedDate"
+    /// CloudKitスキーマ初期化日時（v3コンテナ用）
+    static let cloudKitSchemaInitializedDate = "cloudKitSchemaInitializedDate_v3"
 }
