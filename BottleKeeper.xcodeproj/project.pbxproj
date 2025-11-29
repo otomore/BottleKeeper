@@ -50,7 +50,22 @@
 		A1B2C3D4E5F6789012345607 /* StatisticsComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6789012345617 /* StatisticsComponents.swift */; };
 		A1B2C3D4E5F6789012345608 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6789012345618 /* SettingsViewModel.swift */; };
 		A1B2C3D4E5F6789012345609 /* SettingsComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6789012345619 /* SettingsComponents.swift */; };
+		A1B2C3D4E5F6789012345620 /* StatisticsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6789012345621 /* StatisticsViewModel.swift */; };
+		A1B2C3D4E5F6789012345622 /* BottleListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6789012345623 /* BottleListViewModel.swift */; };
+		B1B2C3D4E5F6789012345630 /* BottleKeeperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1B2C3D4E5F6789012345631 /* BottleKeeperTests.swift */; };
+		B1B2C3D4E5F6789012345632 /* DrinkingLogServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1B2C3D4E5F6789012345633 /* DrinkingLogServiceTests.swift */; };
+		B1B2C3D4E5F6789012345634 /* StatisticsViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1B2C3D4E5F6789012345635 /* StatisticsViewModelTests.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		B1B2C3D4E5F6789012345650 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8D1F4A202C9E5B4300A1B2C3 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8D1F4A272C9E5B4300A1B2C3;
+			remoteInfo = BottleKeeper;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		8D1F4A282C9E5B4300A1B2C3 /* BottleKeeper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BottleKeeper.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -100,10 +115,23 @@
 		A1B2C3D4E5F6789012345617 /* StatisticsComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsComponents.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6789012345618 /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6789012345619 /* SettingsComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsComponents.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6789012345621 /* StatisticsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsViewModel.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6789012345623 /* BottleListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottleListViewModel.swift; sourceTree = "<group>"; };
+		B1B2C3D4E5F6789012345631 /* BottleKeeperTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottleKeeperTests.swift; sourceTree = "<group>"; };
+		B1B2C3D4E5F6789012345633 /* DrinkingLogServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrinkingLogServiceTests.swift; sourceTree = "<group>"; };
+		B1B2C3D4E5F6789012345635 /* StatisticsViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsViewModelTests.swift; sourceTree = "<group>"; };
+		B1B2C3D4E5F6789012345640 /* BottleKeeperTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BottleKeeperTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		8D1F4A252C9E5B4300A1B2C3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B1B2C3D4E5F6789012345641 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -117,6 +145,7 @@
 			isa = PBXGroup;
 			children = (
 				8D1F4A2A2C9E5B4300A1B2C3 /* BottleKeeper */,
+				B1B2C3D4E5F6789012345642 /* BottleKeeperTests */,
 				8D1F4A292C9E5B4300A1B2C3 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -125,8 +154,19 @@
 			isa = PBXGroup;
 			children = (
 				8D1F4A282C9E5B4300A1B2C3 /* BottleKeeper.app */,
+				B1B2C3D4E5F6789012345640 /* BottleKeeperTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		B1B2C3D4E5F6789012345642 /* BottleKeeperTests */ = {
+			isa = PBXGroup;
+			children = (
+				B1B2C3D4E5F6789012345631 /* BottleKeeperTests.swift */,
+				B1B2C3D4E5F6789012345633 /* DrinkingLogServiceTests.swift */,
+				B1B2C3D4E5F6789012345635 /* StatisticsViewModelTests.swift */,
+			);
+			path = BottleKeeperTests;
 			sourceTree = "<group>";
 		};
 		8D1F4A2A2C9E5B4300A1B2C3 /* BottleKeeper */ = {
@@ -194,6 +234,8 @@
 			isa = PBXGroup;
 			children = (
 				A1B2C3D4E5F6789012345618 /* SettingsViewModel.swift */,
+				A1B2C3D4E5F6789012345621 /* StatisticsViewModel.swift */,
+				A1B2C3D4E5F6789012345623 /* BottleListViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -280,7 +322,33 @@
 			productReference = 8D1F4A282C9E5B4300A1B2C3 /* BottleKeeper.app */;
 			productType = "com.apple.product-type.application";
 		};
+		B1B2C3D4E5F6789012345643 /* BottleKeeperTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B1B2C3D4E5F6789012345660 /* Build configuration list for PBXNativeTarget "BottleKeeperTests" */;
+			buildPhases = (
+				B1B2C3D4E5F6789012345644 /* Sources */,
+				B1B2C3D4E5F6789012345641 /* Frameworks */,
+				B1B2C3D4E5F6789012345645 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B1B2C3D4E5F6789012345651 /* PBXTargetDependency */,
+			);
+			name = BottleKeeperTests;
+			productName = BottleKeeperTests;
+			productReference = B1B2C3D4E5F6789012345640 /* BottleKeeperTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
+
+/* Begin PBXTargetDependency section */
+		B1B2C3D4E5F6789012345651 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8D1F4A272C9E5B4300A1B2C3 /* BottleKeeper */;
+			targetProxy = B1B2C3D4E5F6789012345650 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXProject section */
 		8D1F4A202C9E5B4300A1B2C3 /* Project object */ = {
@@ -309,6 +377,7 @@
 			projectRoot = "";
 			targets = (
 				8D1F4A272C9E5B4300A1B2C3 /* BottleKeeper */,
+				B1B2C3D4E5F6789012345643 /* BottleKeeperTests */,
 			);
 		};
 /* End PBXProject section */
@@ -320,6 +389,13 @@
 			files = (
 				8D1F4A332C9E5B4400A1B2C3 /* Preview Assets.xcassets in Resources */,
 				8D1F4A302C9E5B4400A1B2C3 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B1B2C3D4E5F6789012345645 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -371,6 +447,18 @@
 				A1B2C3D4E5F6789012345607 /* StatisticsComponents.swift in Sources */,
 				A1B2C3D4E5F6789012345608 /* SettingsViewModel.swift in Sources */,
 				A1B2C3D4E5F6789012345609 /* SettingsComponents.swift in Sources */,
+				A1B2C3D4E5F6789012345620 /* StatisticsViewModel.swift in Sources */,
+				A1B2C3D4E5F6789012345622 /* BottleListViewModel.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B1B2C3D4E5F6789012345644 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B1B2C3D4E5F6789012345630 /* BottleKeeperTests.swift in Sources */,
+				B1B2C3D4E5F6789012345632 /* DrinkingLogServiceTests.swift in Sources */,
+				B1B2C3D4E5F6789012345634 /* StatisticsViewModelTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -567,6 +655,44 @@
 			};
 			name = Release;
 		};
+		B1B2C3D4E5F6789012345661 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = B3QHWZX47Z;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.bottlekeep.whiskey.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/BottleKeeper.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/BottleKeeper";
+			};
+			name = Debug;
+		};
+		B1B2C3D4E5F6789012345662 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = B3QHWZX47Z;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.bottlekeep.whiskey.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/BottleKeeper.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/BottleKeeper";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -584,6 +710,15 @@
 			buildConfigurations = (
 				8D1F4A372C9E5B4400A1B2C3 /* Debug */,
 				8D1F4A382C9E5B4400A1B2C3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B1B2C3D4E5F6789012345660 /* Build configuration list for PBXNativeTarget "BottleKeeperTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B1B2C3D4E5F6789012345661 /* Debug */,
+				B1B2C3D4E5F6789012345662 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

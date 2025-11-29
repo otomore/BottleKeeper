@@ -15,144 +15,27 @@ struct StatisticsView: View {
         animation: .default)
     private var drinkingLogs: FetchedResults<DrinkingLog>
 
-    // 消費トレンドの表示モード
-    @State private var consumptionPeriod: ConsumptionPeriod = .monthly
-    @State private var selectedConsumption: (String, Int)?
-    @State private var selectedType: String?
-
-    var totalBottles: Int {
-        bottles.count
-    }
-
-    var totalInvestment: Decimal {
-        bottles.reduce(Decimal(0)) { sum, bottle in
-            if let price = bottle.purchasePrice {
-                return sum + price.decimalValue
-            }
-            return sum
-        }
-    }
-
-    var averageABV: Double {
-        guard !bottles.isEmpty else { return 0 }
-        let total = bottles.reduce(0.0) { $0 + $1.abv }
-        return total / Double(bottles.count)
-    }
-
-    var openedBottles: Int {
-        bottles.filter { $0.isOpened }.count
-    }
-
-    var unopenedBottles: Int {
-        bottles.filter { !$0.isOpened }.count
-    }
-
-    var openedPercentage: Double {
-        guard totalBottles > 0 else { return 0 }
-        return Double(openedBottles) / Double(totalBottles) * 100
-    }
-
-    var typeDistribution: [(String, Int)] {
-        let types = Dictionary(grouping: bottles) { $0.wrappedType }
-        return types.map { ($0.key, $0.value.count) }
-            .sorted { $0.1 > $1.1 }
-    }
-
-    var monthlyConsumption: [(String, Int)] {
-        consumptionData(for: .month, count: 6, dateFormat: "M月")
-    }
-
-    var yearlyConsumption: [(String, Int)] {
-        consumptionData(for: .year, count: 5, dateFormat: "yyyy年")
-    }
-
-    /// 期間別消費データを取得する汎用メソッド
-    private func consumptionData(for component: Calendar.Component, count: Int, dateFormat: String) -> [(String, Int)] {
-        let calendar = Calendar.current
-        let now = Date()
-
-        let data = (0..<count).compactMap { offset -> (String, Int)? in
-            guard let date = calendar.date(byAdding: component, value: -offset, to: now) else {
-                return nil
-            }
-
-            let (start, end, label) = periodBounds(for: date, component: component, dateFormat: dateFormat)
-
-            let consumption = drinkingLogs.filter { log in
-                guard let logDate = log.date else { return false }
-                return logDate >= start && logDate <= end
-            }.reduce(0) { $0 + Int($1.volume) }
-
-            return (label, consumption)
-        }
-
-        return data.reversed()
-    }
-
-    /// 期間の開始日・終了日・ラベルを取得
-    private func periodBounds(for date: Date, component: Calendar.Component, dateFormat: String) -> (Date, Date, String) {
-        let calendar = Calendar.current
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "ja_JP")
-
-        switch component {
-        case .month:
-            formatter.dateFormat = dateFormat
-            let label = formatter.string(from: date)
-            let start = calendar.date(from: calendar.dateComponents([.year, .month], from: date))!
-            let end = calendar.date(byAdding: DateComponents(month: 1, day: -1), to: start)!
-            return (start, end, label)
-
-        case .year:
-            let year = calendar.component(.year, from: date)
-            let label = "\(year)年"
-            let start = calendar.date(from: DateComponents(year: year, month: 1, day: 1))!
-            let end = calendar.date(from: DateComponents(year: year, month: 12, day: 31))!
-            return (start, end, label)
-
-        default:
-            // サポートされていないコンポーネントの場合、月にフォールバック
-            print("⚠️ Unsupported calendar component, falling back to month")
-            formatter.dateFormat = dateFormat
-            let label = formatter.string(from: date)
-            let start = calendar.date(from: calendar.dateComponents([.year, .month], from: date))!
-            let end = calendar.date(byAdding: DateComponents(month: 1, day: -1), to: start)!
-            return (start, end, label)
-        }
-    }
-
-    var averageRemainingPercentage: Double {
-        let openedBottlesArray = bottles.filter { $0.isOpened }
-        guard !openedBottlesArray.isEmpty else { return 0 }
-        let total = openedBottlesArray.reduce(0.0) { $0 + $1.remainingPercentage }
-        return total / Double(openedBottlesArray.count)
-    }
-
-    var totalRemainingVolume: Int32 {
-        bottles.reduce(0) { $0 + $1.remainingVolume }
-    }
-
-    // コストパフォーマンス分析（ml単価順）
-    var costPerformanceData: [(bottle: Bottle, pricePerMl: Decimal)] {
-        bottles.compactMap { bottle in
-            guard let price = bottle.purchasePrice,
-                  bottle.volume > 0 else { return nil }
-            let pricePerMl = price.decimalValue / Decimal(bottle.volume)
-            return (bottle, pricePerMl)
-        }
-        .sorted { $0.pricePerMl < $1.pricePerMl }
-    }
+    @StateObject private var viewModel = StatisticsViewModel()
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                if bottles.isEmpty {
+                if !viewModel.hasBottles {
                     emptyStateView
                 } else {
                     statisticsContentView
                 }
             }
             .navigationTitle("統計")
+        }
+        .onAppear {
+            viewModel.updateData(bottles: Array(bottles), drinkingLogs: Array(drinkingLogs))
+        }
+        .onChange(of: bottles.count) { _, _ in
+            viewModel.updateData(bottles: Array(bottles), drinkingLogs: Array(drinkingLogs))
+        }
+        .onChange(of: drinkingLogs.count) { _, _ in
+            viewModel.updateData(bottles: Array(bottles), drinkingLogs: Array(drinkingLogs))
         }
     }
 
@@ -200,28 +83,28 @@ struct StatisticsView: View {
             ], spacing: 16) {
                 StatCardView(
                     title: "総ボトル数",
-                    value: "\(totalBottles)",
+                    value: "\(viewModel.totalBottles)",
                     icon: "wineglass.fill",
                     color: .blue
                 )
 
                 StatCardView(
                     title: "総投資額",
-                    value: "¥\(Int(truncating: totalInvestment as NSNumber))",
+                    value: "¥\(Int(truncating: viewModel.totalInvestment as NSNumber))",
                     icon: "yensign.circle.fill",
                     color: .green
                 )
 
                 StatCardView(
                     title: "平均ABV",
-                    value: String(format: "%.1f%%", averageABV),
+                    value: String(format: "%.1f%%", viewModel.averageABV),
                     icon: "percent",
                     color: .orange
                 )
 
                 StatCardView(
                     title: "開栓率",
-                    value: String(format: "%.0f%%", openedPercentage),
+                    value: String(format: "%.0f%%", viewModel.openedPercentage),
                     icon: "seal.fill",
                     color: .purple
                 )
@@ -238,7 +121,7 @@ struct StatisticsView: View {
 
             HStack(spacing: 20) {
                 VStack {
-                    Text("\(openedBottles)")
+                    Text("\(viewModel.openedBottles)")
                         .font(.title)
                         .fontWeight(.bold)
                     Text("開栓済み")
@@ -250,7 +133,7 @@ struct StatisticsView: View {
                 .subtleGlassEffect(tint: .orange)
 
                 VStack {
-                    Text("\(unopenedBottles)")
+                    Text("\(viewModel.unopenedBottles)")
                         .font(.title)
                         .fontWeight(.bold)
                     Text("未開栓")
@@ -262,7 +145,7 @@ struct StatisticsView: View {
                 .subtleGlassEffect(tint: .green)
             }
 
-            if openedBottles > 0 {
+            if viewModel.openedBottles > 0 {
                 averageRemainingView
             }
 
@@ -277,10 +160,10 @@ struct StatisticsView: View {
                 .font(.subheadline)
                 .foregroundColor(.secondary)
 
-            ProgressView(value: averageRemainingPercentage, total: 100)
+            ProgressView(value: viewModel.averageRemainingPercentage, total: 100)
                 .progressViewStyle(LinearProgressViewStyle(tint: .blue))
 
-            Text("\(averageRemainingPercentage, specifier: "%.1f")%")
+            Text("\(viewModel.averageRemainingPercentage, specifier: "%.1f")%")
                 .font(.caption)
                 .foregroundColor(.secondary)
         }
@@ -295,7 +178,7 @@ struct StatisticsView: View {
                 .foregroundColor(.secondary)
 
             HStack(alignment: .firstTextBaseline, spacing: 4) {
-                Text("\(totalRemainingVolume)")
+                Text("\(viewModel.totalRemainingVolume)")
                     .font(.system(size: 32, weight: .bold))
                     .foregroundColor(.primary)
 
@@ -314,7 +197,7 @@ struct StatisticsView: View {
 
     @ViewBuilder
     private var typeDistributionSection: some View {
-        if !typeDistribution.isEmpty {
+        if viewModel.hasTypeDistribution {
             VStack(spacing: 16) {
                 Text("タイプ別分布")
                     .font(.headline)
@@ -328,14 +211,14 @@ struct StatisticsView: View {
     }
 
     private var typeDistributionChart: some View {
-        Chart(typeDistribution, id: \.0) { type, count in
+        Chart(viewModel.typeDistribution, id: \.0) { type, count in
             SectorMark(
                 angle: .value("本数", count),
                 innerRadius: .ratio(0.5),
                 angularInset: 1.5
             )
             .foregroundStyle(by: .value("タイプ", type))
-            .opacity(selectedType == nil || selectedType == type ? 1.0 : 0.5)
+            .opacity(viewModel.selectedType == nil || viewModel.selectedType == type ? 1.0 : 0.5)
             .annotation(position: .overlay) {
                 Text("\(count)")
                     .font(.caption)
@@ -345,13 +228,13 @@ struct StatisticsView: View {
         }
         .frame(height: 250)
         .chartLegend(position: .bottom, alignment: .center, spacing: 10)
-        .chartAngleSelection(value: $selectedType)
+        .chartAngleSelection(value: $viewModel.selectedType)
     }
 
     @ViewBuilder
     private var typeDistributionDetails: some View {
-        if let selected = selectedType,
-           let selectedData = typeDistribution.first(where: { $0.0 == selected }) {
+        if let selected = viewModel.selectedType,
+           let selectedData = viewModel.typeDistribution.first(where: { $0.0 == selected }) {
             VStack(spacing: 8) {
                 Text("\(selectedData.0)の詳細")
                     .font(.subheadline)
@@ -365,7 +248,7 @@ struct StatisticsView: View {
                 HStack {
                     Text("割合:")
                     Spacer()
-                    Text("\(Double(selectedData.1) / Double(totalBottles) * 100, specifier: "%.1f")%")
+                    Text("\(Double(selectedData.1) / Double(viewModel.totalBottles) * 100, specifier: "%.1f")%")
                         .fontWeight(.bold)
                 }
             }
@@ -374,7 +257,7 @@ struct StatisticsView: View {
         }
 
         VStack(spacing: 8) {
-            ForEach(typeDistribution, id: \.0) { type, count in
+            ForEach(viewModel.typeDistribution, id: \.0) { type, count in
                 HStack {
                     Text(type)
                         .font(.subheadline)
@@ -385,7 +268,7 @@ struct StatisticsView: View {
                         .font(.subheadline)
                         .foregroundColor(.secondary)
 
-                    Text("(\(Double(count) / Double(totalBottles) * 100, specifier: "%.0f")%)")
+                    Text("(\(Double(count) / Double(viewModel.totalBottles) * 100, specifier: "%.0f")%)")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -397,12 +280,11 @@ struct StatisticsView: View {
 
     @ViewBuilder
     private var consumptionTrendSection: some View {
-        let consumptionData = consumptionPeriod == .monthly ? monthlyConsumption : yearlyConsumption
-        if !consumptionData.isEmpty && consumptionData.contains(where: { $0.1 > 0 }) {
+        if viewModel.hasConsumptionData {
             VStack(spacing: 16) {
                 consumptionTrendHeader
-                consumptionTrendChart(data: consumptionData)
-                consumptionTrendStats(data: consumptionData)
+                consumptionTrendChart(data: viewModel.currentConsumptionData)
+                consumptionTrendStats(data: viewModel.currentConsumptionData)
             }
             .padding()
         }
@@ -415,7 +297,7 @@ struct StatisticsView: View {
 
             Spacer()
 
-            Picker("期間", selection: $consumptionPeriod) {
+            Picker("期間", selection: $viewModel.consumptionPeriod) {
                 Text("月次").tag(ConsumptionPeriod.monthly)
                 Text("年次").tag(ConsumptionPeriod.yearly)
             }
@@ -428,11 +310,11 @@ struct StatisticsView: View {
         VStack(spacing: 8) {
             Chart(data, id: \.0) { period, volume in
                 BarMark(
-                    x: .value(consumptionPeriod == .monthly ? "月" : "年", period),
+                    x: .value(viewModel.consumptionPeriod == .monthly ? "月" : "年", period),
                     y: .value("消費量", volume)
                 )
                 .foregroundStyle(
-                    selectedConsumption?.0 == period
+                    viewModel.selectedConsumption?.0 == period
                         ? Color.orange.gradient
                         : Color.blue.gradient
                 )
@@ -457,7 +339,7 @@ struct StatisticsView: View {
                 }
             }
 
-            if let selected = selectedConsumption {
+            if let selected = viewModel.selectedConsumption {
                 VStack(spacing: 8) {
                     Text("\(selected.0)の詳細")
                         .font(.subheadline)
@@ -476,33 +358,11 @@ struct StatisticsView: View {
     }
 
     private func consumptionTrendStats(data: [(String, Int)]) -> some View {
-        let totalConsumption = data.reduce(0) { $0 + $1.1 }
-
-        // 実際の消費期間を計算（初回消費日から現在まで）
-        let avgConsumption: Int
-        if let firstLog = drinkingLogs.last, let firstDate = firstLog.date {
-            let calendar = Calendar.current
-            let now = Date()
-
-            let actualPeriods: Int
-            if consumptionPeriod == .monthly {
-                // 月数の差を計算
-                let components = calendar.dateComponents([.month], from: firstDate, to: now)
-                actualPeriods = max(1, (components.month ?? 0) + 1) // 最低1ヶ月
-            } else {
-                // 年数の差を計算
-                let components = calendar.dateComponents([.year], from: firstDate, to: now)
-                actualPeriods = max(1, (components.year ?? 0) + 1) // 最低1年
-            }
-
-            avgConsumption = totalConsumption / actualPeriods
-        } else {
-            avgConsumption = totalConsumption
-        }
+        let stats = viewModel.consumptionTrendStats(data: data)
 
         return HStack(spacing: 20) {
             VStack {
-                Text("\(totalConsumption)ml")
+                Text("\(stats.total)ml")
                     .font(.title3)
                     .fontWeight(.bold)
                 Text("合計消費量")
@@ -514,10 +374,10 @@ struct StatisticsView: View {
             .subtleGlassEffect(tint: .blue)
 
             VStack {
-                Text("\(avgConsumption)ml")
+                Text("\(stats.average)ml")
                     .font(.title3)
                     .fontWeight(.bold)
-                Text(consumptionPeriod == .monthly ? "月平均" : "年平均")
+                Text(viewModel.consumptionPeriod == .monthly ? "月平均" : "年平均")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -529,20 +389,20 @@ struct StatisticsView: View {
 
     @ViewBuilder
     private var costPerformanceSection: some View {
-        if !costPerformanceData.isEmpty {
+        if viewModel.hasCostPerformanceData {
             VStack(spacing: 16) {
                 Text("コストパフォーマンス分析")
                     .font(.headline)
                     .frame(maxWidth: .infinity, alignment: .leading)
 
                 VStack(spacing: 8) {
-                    ForEach(Array(costPerformanceData.prefix(10).enumerated()), id: \.element.bottle.id) { index, data in
+                    ForEach(Array(viewModel.costPerformanceData.prefix(10).enumerated()), id: \.element.bottle.id) { index, data in
                         CostPerformanceRow(index: index, bottle: data.bottle, pricePerMl: data.pricePerMl)
                     }
                 }
 
-                if costPerformanceData.count > 10 {
-                    Text("上位10件を表示中（全\(costPerformanceData.count)件）")
+                if viewModel.costPerformanceData.count > 10 {
+                    Text("上位10件を表示中（全\(viewModel.costPerformanceData.count)件）")
                         .font(.caption)
                         .foregroundColor(.secondary)
                         .frame(maxWidth: .infinity, alignment: .center)
