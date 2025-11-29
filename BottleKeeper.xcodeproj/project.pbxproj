@@ -44,6 +44,12 @@
 		A1B2C3D4E5F6789012345601 /* UserDefaults+App.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6789012345611 /* UserDefaults+App.swift */; };
 		A1B2C3D4E5F6789012345602 /* DrinkingLogService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6789012345612 /* DrinkingLogService.swift */; };
 		A1B2C3D4E5F6789012345603 /* Filterable.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6789012345613 /* Filterable.swift */; };
+		A1B2C3D4E5F6789012345604 /* BottleShapes.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6789012345614 /* BottleShapes.swift */; };
+		A1B2C3D4E5F6789012345605 /* BottleRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6789012345615 /* BottleRowView.swift */; };
+		A1B2C3D4E5F6789012345606 /* QuickUpdateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6789012345616 /* QuickUpdateView.swift */; };
+		A1B2C3D4E5F6789012345607 /* StatisticsComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6789012345617 /* StatisticsComponents.swift */; };
+		A1B2C3D4E5F6789012345608 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6789012345618 /* SettingsViewModel.swift */; };
+		A1B2C3D4E5F6789012345609 /* SettingsComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6789012345619 /* SettingsComponents.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -88,6 +94,12 @@
 		A1B2C3D4E5F6789012345611 /* UserDefaults+App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaults+App.swift"; sourceTree = "<group>"; };
 		A1B2C3D4E5F6789012345612 /* DrinkingLogService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrinkingLogService.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6789012345613 /* Filterable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Filterable.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6789012345614 /* BottleShapes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottleShapes.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6789012345615 /* BottleRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottleRowView.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6789012345616 /* QuickUpdateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickUpdateView.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6789012345617 /* StatisticsComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsComponents.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6789012345618 /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6789012345619 /* SettingsComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsComponents.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -169,6 +181,11 @@
 				06ED3AE94669412C9716E9609F71A09F /* ImagePicker.swift */,
 				EAD8DD6C9BAF4460B4F66478 /* TastingNoteFormView.swift */,
 				ACE32BE46B6449E6AAA3101E /* NotificationSettingsView.swift */,
+				A1B2C3D4E5F6789012345614 /* BottleShapes.swift */,
+				A1B2C3D4E5F6789012345615 /* BottleRowView.swift */,
+				A1B2C3D4E5F6789012345616 /* QuickUpdateView.swift */,
+				A1B2C3D4E5F6789012345617 /* StatisticsComponents.swift */,
+				A1B2C3D4E5F6789012345619 /* SettingsComponents.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -176,6 +193,7 @@
 		8D1F4A462C9E5B8A00A1B2C3 /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
+				A1B2C3D4E5F6789012345618 /* SettingsViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -347,6 +365,12 @@
 				A1B2C3D4E5F6789012345601 /* UserDefaults+App.swift in Sources */,
 				A1B2C3D4E5F6789012345602 /* DrinkingLogService.swift in Sources */,
 				A1B2C3D4E5F6789012345603 /* Filterable.swift in Sources */,
+				A1B2C3D4E5F6789012345604 /* BottleShapes.swift in Sources */,
+				A1B2C3D4E5F6789012345605 /* BottleRowView.swift in Sources */,
+				A1B2C3D4E5F6789012345606 /* QuickUpdateView.swift in Sources */,
+				A1B2C3D4E5F6789012345607 /* StatisticsComponents.swift in Sources */,
+				A1B2C3D4E5F6789012345608 /* SettingsViewModel.swift in Sources */,
+				A1B2C3D4E5F6789012345609 /* SettingsComponents.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

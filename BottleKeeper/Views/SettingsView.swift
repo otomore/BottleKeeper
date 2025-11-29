@@ -1,105 +1,6 @@
 import SwiftUI
 import CoreData
 
-// MARK: - Settings View Model
-
-@MainActor
-class SettingsViewModel: ObservableObject {
-    @Published var showingDeleteAlert = false
-    @Published var iCloudSyncAvailable = false
-    @Published var showingSchemaInitAlert = false
-    @Published var schemaInitError: String?
-    @Published var isInitializingSchema = false
-
-    private let coreDataManager: CoreDataManager
-
-    init(coreDataManager: CoreDataManager = .shared) {
-        self.coreDataManager = coreDataManager
-        self.iCloudSyncAvailable = coreDataManager.isCloudSyncAvailable
-    }
-
-    var isCloudKitSchemaInitialized: Bool {
-        coreDataManager.isCloudKitSchemaInitialized
-    }
-
-    var cloudKitLogs: [String] {
-        coreDataManager.logs
-    }
-
-    /// すべてのデータを削除
-    func deleteAllData(bottles: FetchedResults<Bottle>, wishlistItems: FetchedResults<WishlistItem>, context: NSManagedObjectContext) {
-        guard !bottles.isEmpty || !wishlistItems.isEmpty else {
-            print("ℹ️ No data to delete")
-            return
-        }
-
-        let bottleCount = bottles.count
-        let wishlistCount = wishlistItems.count
-
-        // すべてのボトルを削除
-        bottles.forEach { bottle in
-            context.delete(bottle)
-        }
-
-        // すべてのウィッシュリストアイテムを削除
-        wishlistItems.forEach { item in
-            context.delete(item)
-        }
-
-        do {
-            try context.save()
-            print("✅ Deleted \(bottleCount) bottles and \(wishlistCount) wishlist items")
-        } catch {
-            let nsError = error as NSError
-            print("❌ Failed to delete all data: \(nsError), \(nsError.userInfo)")
-
-            // コンテキストをロールバックして変更を元に戻す
-            context.rollback()
-        }
-    }
-
-    /// CloudKitスキーマを初期化
-    func initializeCloudKitSchema() {
-        isInitializingSchema = true
-        schemaInitError = nil
-
-        Task {
-            do {
-                try coreDataManager.initializeCloudKitSchema()
-                await MainActor.run {
-                    isInitializingSchema = false
-                    showingSchemaInitAlert = true
-                }
-            } catch {
-                await MainActor.run {
-                    isInitializingSchema = false
-                    schemaInitError = error.localizedDescription
-                    showingSchemaInitAlert = true
-                }
-            }
-        }
-    }
-
-    /// iCloud同期状態を更新
-    func refreshCloudSyncStatus() {
-        iCloudSyncAvailable = coreDataManager.isCloudSyncAvailable
-    }
-
-    /// CloudKit診断情報を表示
-    func showDiagnosticInfo() {
-        let diagnosticInfo = coreDataManager.diagnosticCloudKitStatus()
-        print(diagnosticInfo)
-    }
-
-    /// iCloud状態を再確認
-    func recheckiCloudStatus() {
-        coreDataManager.recheckiCloudStatus()
-        refreshCloudSyncStatus()
-    }
-}
-
-// MARK: - Settings View
-
 struct SettingsView: View {
     @Environment(\.managedObjectContext) private var viewContext
 
@@ -225,96 +126,7 @@ struct SettingsView: View {
                 premiumFeaturesSection
 
                 // iCloud同期状態
-                Section {
-                    // 同期状態
-                    HStack {
-                        Label("同期状態", systemImage: "icloud")
-                        Spacer()
-                        if viewModel.iCloudSyncAvailable {
-                            HStack(spacing: 4) {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .foregroundColor(.green)
-                                Text("利用可能")
-                                    .foregroundColor(.green)
-                            }
-                        } else {
-                            HStack(spacing: 4) {
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundColor(.red)
-                                Text("利用不可")
-                                    .foregroundColor(.red)
-                            }
-                        }
-                    }
-
-                    // スキーマ初期化状態
-                    HStack {
-                        Label("スキーマ初期化", systemImage: "cloud.fill")
-                        Spacer()
-                        if viewModel.isCloudKitSchemaInitialized {
-                            HStack(spacing: 4) {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .foregroundColor(.green)
-                                Text("初期化済み")
-                                    .foregroundColor(.green)
-                            }
-                        } else {
-                            HStack(spacing: 4) {
-                                Image(systemName: "exclamationmark.circle.fill")
-                                    .foregroundColor(.orange)
-                                Text("未初期化")
-                                    .foregroundColor(.orange)
-                            }
-                        }
-                    }
-
-                    // スキーマ初期化ボタン
-                    Button {
-                        viewModel.initializeCloudKitSchema()
-                    } label: {
-                        HStack {
-                            Label("CloudKitスキーマを初期化", systemImage: "arrow.clockwise.icloud")
-                            Spacer()
-                            if viewModel.isInitializingSchema {
-                                ProgressView()
-                            }
-                        }
-                    }
-                    .disabled(viewModel.isInitializingSchema || !viewModel.iCloudSyncAvailable)
-
-                    // 診断情報ボタン
-                    Button {
-                        viewModel.showDiagnosticInfo()
-                    } label: {
-                        Label("CloudKit診断情報を表示", systemImage: "info.circle")
-                    }
-
-                    // iCloud状態再確認ボタン
-                    Button {
-                        viewModel.recheckiCloudStatus()
-                    } label: {
-                        Label("iCloud状態を再確認", systemImage: "arrow.clockwise")
-                    }
-
-                    // デバッグログへのリンク
-                    NavigationLink(destination: CloudKitDebugLogView()) {
-                        Label("デバッグログを表示", systemImage: "list.bullet.rectangle")
-                    }
-                } header: {
-                    Text("iCloud同期")
-                } footer: {
-                    if !viewModel.iCloudSyncAvailable {
-                        Text("iCloud同期を使用するには、デバイスでiCloudにサインインしてください。")
-                    } else if !viewModel.isCloudKitSchemaInitialized {
-                        #if DEBUG
-                        Text("初めてiCloud同期を使用する場合は、CloudKitスキーマの初期化を実行してください。開発環境でのみ有効です。")
-                        #else
-                        Text("「CloudKitスキーマを初期化」ボタンをタップしてください。本番環境では、データを追加・変更すると自動的にCloudKitスキーマが作成され、同期が開始されます。")
-                        #endif
-                    } else {
-                        Text("iCloudを使用してデバイス間でデータを自動同期します。問題が発生した場合は、デバッグログを確認してください。")
-                    }
-                }
+                iCloudSyncSection
 
                 // バージョン情報
                 Section("アプリ情報") {
@@ -327,51 +139,10 @@ struct SettingsView: View {
                 }
 
                 // データ管理
-                Section("データ管理") {
-                    HStack {
-                        HStack {
-                            Text("🥃")
-                                .font(.body)
-                            Text("総ボトル数")
-                        }
-                        Spacer()
-                        Text("\(bottles.count)本")
-                            .foregroundColor(.secondary)
-                    }
-
-                    HStack {
-                        Label("ウィッシュリスト", systemImage: "star.fill")
-                        Spacer()
-                        Text("\(wishlistItems.count)件")
-                            .foregroundColor(.secondary)
-                    }
-
-                    Button(role: .destructive) {
-                        viewModel.showingDeleteAlert = true
-                    } label: {
-                        Label("すべてのデータを削除", systemImage: "trash.fill")
-                    }
-                }
+                dataManagementSection
 
                 // アプリについて
-                Section("アプリについて") {
-                    HStack {
-                        Label("開発者", systemImage: "person.fill")
-                        Spacer()
-                        Text("otomore")
-                            .foregroundColor(.secondary)
-                    }
-
-                    Link(destination: URL(string: "https://x.com/otomore01")!) {
-                        HStack {
-                            Label("X (Twitter)", systemImage: "link")
-                            Spacer()
-                            Image(systemName: "arrow.up.right")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                }
+                aboutSection
 
                 // フッター情報
                 Section {
@@ -414,156 +185,152 @@ struct SettingsView: View {
             }
         }
     }
-}
 
-// MARK: - Premium Feature Row Component
+    // MARK: - iCloud Sync Section
 
-struct PremiumFeatureRow: View {
-    let icon: String
-    let iconColor: Color
-    let title: String
-    let description: String
-    let price: String
-    let isPurchased: Bool
-
-    var body: some View {
-        Button {
-            // TODO: 実際の購入処理を実装
-            print("購入ボタンタップ: \(title)")
-        } label: {
-            HStack(spacing: 12) {
-                // アイコン
-                Image(systemName: icon)
-                    .font(.title2)
-                    .foregroundColor(iconColor)
-                    .frame(width: 44, height: 44)
-                    .background(iconColor.opacity(0.15))
-                    .cornerRadius(10)
-
-                // 説明
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(title)
-                        .font(.headline)
-                        .foregroundColor(.primary)
-
-                    Text(description)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .lineLimit(2)
-                }
-
+    private var iCloudSyncSection: some View {
+        Section {
+            // 同期状態
+            HStack {
+                Label("同期状態", systemImage: "icloud")
                 Spacer()
-
-                // 価格または購入済みバッジ
-                if isPurchased {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.title3)
-                        .foregroundColor(.green)
-                } else {
-                    VStack(spacing: 2) {
-                        Text(price)
-                            .font(.headline)
-                            .foregroundColor(.blue)
-                        Text("購入")
-                            .font(.caption2)
-                            .foregroundColor(.blue)
+                if viewModel.iCloudSyncAvailable {
+                    HStack(spacing: 4) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.green)
+                        Text("利用可能")
+                            .foregroundColor(.green)
                     }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(Color.blue.opacity(0.1))
-                    .cornerRadius(8)
+                } else {
+                    HStack(spacing: 4) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(.red)
+                        Text("利用不可")
+                            .foregroundColor(.red)
+                    }
                 }
             }
-            .padding()
-        }
-        .buttonStyle(.plain)
-        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-        .listRowBackground(Color.clear)
-        .background {
-            RoundedRectangle(cornerRadius: 12)
-                .fill(.ultraThinMaterial)
-                .overlay {
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color(red: 0.8, green: 0.5, blue: 0.2).opacity(0.3), lineWidth: 1)
-                }
-        }
-        .disabled(isPurchased)
-    }
-}
 
-// MARK: - CloudKit Debug Log View
-
-struct CloudKitDebugLogView: View {
-    @ObservedObject private var coreDataManager = CoreDataManager.shared
-    @State private var showingCopyConfirmation = false
-    @State private var showingClearConfirmation = false
-
-    var body: some View {
-        List {
-            Section {
-                if coreDataManager.logs.isEmpty {
-                    VStack(spacing: 8) {
-                        Image(systemName: "text.alignleft")
-                            .font(.largeTitle)
-                            .foregroundColor(.secondary)
-                        Text("ログがありません")
-                            .foregroundColor(.secondary)
-                            .font(.caption)
+            // スキーマ初期化状態
+            HStack {
+                Label("スキーマ初期化", systemImage: "cloud.fill")
+                Spacer()
+                if viewModel.isCloudKitSchemaInitialized {
+                    HStack(spacing: 4) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.green)
+                        Text("初期化済み")
+                            .foregroundColor(.green)
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding()
                 } else {
-                    ForEach(coreDataManager.logs, id: \.self) { log in
-                        Text(log)
-                            .font(.caption)
-                            .textSelection(.enabled)
-                            .padding(.vertical, 4)
+                    HStack(spacing: 4) {
+                        Image(systemName: "exclamationmark.circle.fill")
+                            .foregroundColor(.orange)
+                        Text("未初期化")
+                            .foregroundColor(.orange)
                     }
                 }
-            } header: {
+            }
+
+            // スキーマ初期化ボタン
+            Button {
+                viewModel.initializeCloudKitSchema()
+            } label: {
                 HStack {
-                    Text("CloudKit同期ログ")
+                    Label("CloudKitスキーマを初期化", systemImage: "arrow.clockwise.icloud")
                     Spacer()
-                    Text("\(coreDataManager.logs.count)件")
-                        .foregroundColor(.secondary)
+                    if viewModel.isInitializingSchema {
+                        ProgressView()
+                    }
+                }
+            }
+            .disabled(viewModel.isInitializingSchema || !viewModel.iCloudSyncAvailable)
+
+            // 診断情報ボタン
+            Button {
+                viewModel.showDiagnosticInfo()
+            } label: {
+                Label("CloudKit診断情報を表示", systemImage: "info.circle")
+            }
+
+            // iCloud状態再確認ボタン
+            Button {
+                viewModel.recheckiCloudStatus()
+            } label: {
+                Label("iCloud状態を再確認", systemImage: "arrow.clockwise")
+            }
+
+            // デバッグログへのリンク
+            NavigationLink(destination: CloudKitDebugLogView()) {
+                Label("デバッグログを表示", systemImage: "list.bullet.rectangle")
+            }
+        } header: {
+            Text("iCloud同期")
+        } footer: {
+            if !viewModel.iCloudSyncAvailable {
+                Text("iCloud同期を使用するには、デバイスでiCloudにサインインしてください。")
+            } else if !viewModel.isCloudKitSchemaInitialized {
+                #if DEBUG
+                Text("初めてiCloud同期を使用する場合は、CloudKitスキーマの初期化を実行してください。開発環境でのみ有効です。")
+                #else
+                Text("「CloudKitスキーマを初期化」ボタンをタップしてください。本番環境では、データを追加・変更すると自動的にCloudKitスキーマが作成され、同期が開始されます。")
+                #endif
+            } else {
+                Text("iCloudを使用してデバイス間でデータを自動同期します。問題が発生した場合は、デバッグログを確認してください。")
+            }
+        }
+    }
+
+    // MARK: - Data Management Section
+
+    private var dataManagementSection: some View {
+        Section("データ管理") {
+            HStack {
+                HStack {
+                    Text("🥃")
+                        .font(.body)
+                    Text("総ボトル数")
+                }
+                Spacer()
+                Text("\(bottles.count)本")
+                    .foregroundColor(.secondary)
+            }
+
+            HStack {
+                Label("ウィッシュリスト", systemImage: "star.fill")
+                Spacer()
+                Text("\(wishlistItems.count)件")
+                    .foregroundColor(.secondary)
+            }
+
+            Button(role: .destructive) {
+                viewModel.showingDeleteAlert = true
+            } label: {
+                Label("すべてのデータを削除", systemImage: "trash.fill")
+            }
+        }
+    }
+
+    // MARK: - About Section
+
+    private var aboutSection: some View {
+        Section("アプリについて") {
+            HStack {
+                Label("開発者", systemImage: "person.fill")
+                Spacer()
+                Text("otomore")
+                    .foregroundColor(.secondary)
+            }
+
+            Link(destination: URL(string: "https://x.com/otomore01")!) {
+                HStack {
+                    Label("X (Twitter)", systemImage: "link")
+                    Spacer()
+                    Image(systemName: "arrow.up.right")
                         .font(.caption)
+                        .foregroundColor(.secondary)
                 }
-            } footer: {
-                Text("ログは最新100件まで保存されます。CloudKit同期に関するイベントとエラーが記録されます。")
-                    .font(.caption2)
             }
-
-            Section {
-                Button {
-                    UIPasteboard.general.string = coreDataManager.logs.joined(separator: "\n")
-                    showingCopyConfirmation = true
-                } label: {
-                    Label("ログをコピー", systemImage: "doc.on.clipboard")
-                }
-                .disabled(coreDataManager.logs.isEmpty)
-
-                Button(role: .destructive) {
-                    showingClearConfirmation = true
-                } label: {
-                    Label("ログをクリア", systemImage: "trash")
-                }
-                .disabled(coreDataManager.logs.isEmpty)
-            }
-        }
-        .navigationTitle("CloudKit デバッグ")
-        .navigationBarTitleDisplayMode(.inline)
-        .alert("コピー完了", isPresented: $showingCopyConfirmation) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text("ログをクリップボードにコピーしました")
-        }
-        .alert("ログをクリア", isPresented: $showingClearConfirmation) {
-            Button("キャンセル", role: .cancel) {}
-            Button("クリア", role: .destructive) {
-                coreDataManager.clearLogs()
-            }
-        } message: {
-            Text("すべてのログを削除します。この操作は取り消せません。")
         }
     }
 }
