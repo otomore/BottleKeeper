@@ -21,4 +21,15 @@ enum UserDefaultsKeys {
 
     /// 90日後通知の有効/無効
     static let notifyAt90Days = "notifyAt90Days"
+
+    // MARK: - CloudKit Settings
+
+    /// CloudKitコンテナID（コンテナ変更検出用）
+    static let cloudKitContainerID = "cloudKitContainerID"
+
+    /// CloudKitスキーマ初期化済みフラグ
+    static let cloudKitSchemaInitialized = "cloudKitSchemaInitialized"
+
+    /// CloudKitスキーマ初期化日時
+    static let cloudKitSchemaInitializedDate = "cloudKitSchemaInitializedDate"
 }

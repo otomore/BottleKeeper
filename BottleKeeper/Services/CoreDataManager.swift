@@ -10,11 +10,6 @@ private enum CoreDataConstants {
     static let maxLogCount = 100
     static let previewSampleCount = 5
 
-    enum UserDefaultsKeys {
-        static let cloudKitSchemaInitialized = "cloudKitSchemaInitialized"
-        static let cloudKitSchemaInitializedDate = "cloudKitSchemaInitializedDate"
-    }
-
     enum EntityNames {
         static let bottle = "Bottle"
         static let wishlistItem = "WishlistItem"
@@ -101,13 +96,12 @@ class CoreDataManager: ObservableObject {
 
     init(inMemory: Bool = false) {
         // CloudKitコンテナ変更検知（RELEASE環境でも動作する必要がある）
-        let currentContainerID = UserDefaults.standard.string(forKey: "cloudKitContainerID")
+        let currentContainerID = UserDefaults.standard.cloudKitContainerID
         let expectedContainerID = CoreDataConstants.cloudKitContainerIdentifier
 
         if currentContainerID != expectedContainerID {
-            UserDefaults.standard.removeObject(forKey: CoreDataConstants.UserDefaultsKeys.cloudKitSchemaInitialized)
-            UserDefaults.standard.removeObject(forKey: CoreDataConstants.UserDefaultsKeys.cloudKitSchemaInitializedDate)
-            UserDefaults.standard.set(expectedContainerID, forKey: "cloudKitContainerID")
+            UserDefaults.standard.resetCloudKitSettings()
+            UserDefaults.standard.cloudKitContainerID = expectedContainerID
             #if DEBUG
             print("🔄 CloudKit container changed from \(currentContainerID ?? "nil") to \(expectedContainerID)")
             print("🔄 UserDefaults cleared for new schema initialization")
@@ -402,14 +396,12 @@ extension CoreDataManager {
 
     /// CloudKitスキーマが初期化済みかどうか
     var isCloudKitSchemaInitialized: Bool {
-        return UserDefaults.standard.bool(forKey: CoreDataConstants.UserDefaultsKeys.cloudKitSchemaInitialized)
+        return UserDefaults.standard.cloudKitSchemaInitialized
     }
 
     /// CloudKitスキーマの初期化日時
     var cloudKitSchemaInitializedDate: Date? {
-        return UserDefaults.standard.object(
-            forKey: CoreDataConstants.UserDefaultsKeys.cloudKitSchemaInitializedDate
-        ) as? Date
+        return UserDefaults.standard.cloudKitSchemaInitializedDate
     }
 
     /// CloudKitスキーマを初期化（初回セットアップ時のみ実行）
@@ -438,14 +430,8 @@ extension CoreDataManager {
             log("✅ CloudKit schema initialized successfully in Production")
             log("✅ CD_Bottle, CD_WishlistItem, CD_DrinkingLog, CD_BottlePhoto record types created")
 
-            UserDefaults.standard.set(
-                true,
-                forKey: CoreDataConstants.UserDefaultsKeys.cloudKitSchemaInitialized
-            )
-            UserDefaults.standard.set(
-                Date(),
-                forKey: CoreDataConstants.UserDefaultsKeys.cloudKitSchemaInitializedDate
-            )
+            UserDefaults.standard.cloudKitSchemaInitialized = true
+            UserDefaults.standard.cloudKitSchemaInitializedDate = Date()
         } catch let error as NSError {
             log("❌ Failed to initialize CloudKit schema")
             log("Error domain: \(error.domain)")

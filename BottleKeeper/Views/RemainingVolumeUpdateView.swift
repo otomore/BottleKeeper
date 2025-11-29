@@ -145,39 +145,18 @@ struct RemainingVolumeUpdateView: View {
 
     private func saveRemainingVolume() {
         withAnimation {
-            let oldRemaining = bottle.remainingVolume
             let newRemaining = Int32(remainingVolume)
-            let consumed = oldRemaining - newRemaining
-
-            // 消費量が発生した場合のみ飲酒ログを作成
-            if consumed > 0 {
-                let log = DrinkingLog(context: viewContext)
-                log.id = UUID()
-                log.date = Date()
-                log.volume = consumed
-                log.notes = "残量更新"
-                log.createdAt = Date()
-                log.bottle = bottle
-            }
-
-            bottle.remainingVolume = newRemaining
-            bottle.updatedAt = Date()
-
-            // 残量が0になった場合の処理
-            if remainingVolume == 0 {
-                // 必要に応じて空瓶フラグなどを設定
-            }
 
             do {
-                try viewContext.save()
+                try DrinkingLogService.shared.updateRemainingVolume(
+                    bottle: bottle,
+                    newRemaining: newRemaining,
+                    context: viewContext
+                )
 
                 // 通知を再スケジュール
                 Task {
-                    let request = NSFetchRequest<Bottle>(entityName: "Bottle")
-                    let bottles = try? viewContext.fetch(request)
-                    if let bottles = bottles {
-                        await NotificationManager.shared.scheduleAllNotifications(for: bottles)
-                    }
+                    await DrinkingLogService.shared.rescheduleAllNotifications(context: viewContext)
                 }
 
                 dismiss()

@@ -39,11 +39,9 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
     // 残量少なし通知（残量設定値以下）
     private func scheduleLowStockNotification(for bottle: Bottle) {
         // UserDefaultsから設定を取得
-        let notificationsEnabled = UserDefaults.standard.bool(forKey: "notificationsEnabled")
-        guard notificationsEnabled else { return }
+        guard UserDefaults.standard.notificationsEnabled else { return }
 
-        let threshold = UserDefaults.standard.double(forKey: "lowStockThreshold")
-        let lowStockThreshold = threshold > 0 ? threshold : 10.0
+        let lowStockThreshold = UserDefaults.standard.lowStockThreshold
 
         guard bottle.isOpened, bottle.remainingPercentage <= lowStockThreshold, bottle.remainingPercentage > 0 else {
             return
@@ -72,8 +70,7 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
     // 開栓後経過日数通知
     private func scheduleAgeNotification(for bottle: Bottle) {
         // UserDefaultsから設定を取得
-        let notificationsEnabled = UserDefaults.standard.bool(forKey: "notificationsEnabled")
-        guard notificationsEnabled else { return }
+        guard UserDefaults.standard.notificationsEnabled else { return }
 
         guard let openedDate = bottle.openedDate else {
             return
@@ -88,13 +85,13 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
 
         // UserDefaultsから有効な通知日数を取得
         var thresholds: [Int] = []
-        if UserDefaults.standard.bool(forKey: "notifyAt30Days") {
+        if UserDefaults.standard.notifyAt30Days {
             thresholds.append(30)
         }
-        if UserDefaults.standard.bool(forKey: "notifyAt60Days") {
+        if UserDefaults.standard.notifyAt60Days {
             thresholds.append(60)
         }
-        if UserDefaults.standard.bool(forKey: "notifyAt90Days") {
+        if UserDefaults.standard.notifyAt90Days {
             thresholds.append(90)
         }
 

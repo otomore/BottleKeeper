@@ -41,6 +41,9 @@
 		5DB82EC2C13B40C29E66948C /* AppColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCC082850CD34DBA9A6347DB /* AppColors.swift */; };
 		1033A19CF2C348F593A2030B /* UserDefaultsKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = E48E2D5D3CA8418C818D2AFE /* UserDefaultsKeys.swift */; };
 		57EC6182BF8A46E6A2B4B57F /* ViewExtensions+Glass.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5285EC9B6D4419793D736CF /* ViewExtensions+Glass.swift */; };
+		A1B2C3D4E5F6789012345601 /* UserDefaults+App.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6789012345611 /* UserDefaults+App.swift */; };
+		A1B2C3D4E5F6789012345602 /* DrinkingLogService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6789012345612 /* DrinkingLogService.swift */; };
+		A1B2C3D4E5F6789012345603 /* Filterable.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6789012345613 /* Filterable.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -82,6 +85,9 @@
 		3F5AA5F05B074B40A0A01B70 /* BottleKeeper.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BottleKeeper.entitlements; sourceTree = "<group>"; };
 		9FC95E3D18574326A6264450 /* BottleKeeper.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BottleKeeper.entitlements; sourceTree = "<group>"; };
 		D5285EC9B6D4419793D736CF /* ViewExtensions+Glass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewExtensions+Glass.swift"; sourceTree = "<group>"; };
+		A1B2C3D4E5F6789012345611 /* UserDefaults+App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaults+App.swift"; sourceTree = "<group>"; };
+		A1B2C3D4E5F6789012345612 /* DrinkingLogService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrinkingLogService.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6789012345613 /* Filterable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Filterable.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -197,6 +203,7 @@
 				4AE924202E254E3F855380397BE0ACDD /* PhotoManager.swift */,
 				5F4720B123464CF38839432E /* ImageCache.swift */,
 				7999F94528DB4234BD633DF4 /* NotificationManager.swift */,
+				A1B2C3D4E5F6789012345612 /* DrinkingLogService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -221,6 +228,7 @@
 			children = (
 				DCC082850CD34DBA9A6347DB /* AppColors.swift */,
 				E48E2D5D3CA8418C818D2AFE /* UserDefaultsKeys.swift */,
+				A1B2C3D4E5F6789012345611 /* UserDefaults+App.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -229,6 +237,7 @@
 			isa = PBXGroup;
 			children = (
 				D5285EC9B6D4419793D736CF /* ViewExtensions+Glass.swift */,
+				A1B2C3D4E5F6789012345613 /* Filterable.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -335,6 +344,9 @@
 				4AA0979B03BC46A68B34B8FF /* StarRatingView.swift in Sources */,
 				5DB82EC2C13B40C29E66948C /* AppColors.swift in Sources */,
 				1033A19CF2C348F593A2030B /* UserDefaultsKeys.swift in Sources */,
+				A1B2C3D4E5F6789012345601 /* UserDefaults+App.swift in Sources */,
+				A1B2C3D4E5F6789012345602 /* DrinkingLogService.swift in Sources */,
+				A1B2C3D4E5F6789012345603 /* Filterable.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

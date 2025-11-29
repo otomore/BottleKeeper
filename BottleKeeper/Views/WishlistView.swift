@@ -20,14 +20,7 @@ struct WishlistView: View {
     @State private var wishlistItemForBottle: WishlistItem?
 
     var filteredItems: [WishlistItem] {
-        if searchText.isEmpty {
-            return Array(wishlistItems)
-        } else {
-            return wishlistItems.filter { item in
-                item.wrappedName.localizedCaseInsensitiveContains(searchText) ||
-                item.wrappedDistillery.localizedCaseInsensitiveContains(searchText)
-            }
-        }
+        wishlistItems.filtered(by: searchText)
     }
 
     var body: some View {
