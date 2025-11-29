@@ -20,14 +20,13 @@ platform :ios do
     ipa_path = "./ipa/BottleKeeper.ipa"
 
     # TestFlightにアップロード
+    # 注意: groupsパラメータは外部テスター用であり、内部テスターには適用不可
+    # 内部テスターへの自動配信はApp Store Connectで「自動配信」を有効にすること
     upload_to_testflight(
       api_key: api_key,
       ipa: ipa_path,
-      skip_waiting_for_build_processing: false, # ビルド処理の完了を待つ（グループ配信に必要）
-      skip_submission: false, # 自動提出を有効化
-      distribute_external: false, # 外部テスターには配布しない（内部グループのみ）
-      notify_external_testers: false,
-      groups: ["tester"] # 内部テスターグループ「tester」に自動配信
+      skip_waiting_for_build_processing: false, # ビルド処理の完了を待つ
+      skip_submission: true # アップロードのみ（配信はApp Store Connect側の自動配信設定で行う）
     )
 
     UI.success("🎉 TestFlightへのアップロードが完了しました！")

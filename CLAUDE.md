@@ -52,9 +52,13 @@ Claude Code は以下のルールに従ってください：
 
 **Macなし環境での開発フロー**:
 - GitHub Actionsをビルド＆テスト環境として活用
-- シミュレーター起動とスキーマ初期化もGitHub Actionsで実行
 - プロビジョニングプロファイルはApple Developer Portal（Web）で管理
 - すべての設定変更はファイル編集で実施（Xcode GUI不要）
+
+**CloudKitスキーマ初期化**:
+- スキーマ初期化は**一度だけ**必要（Development環境セットアップ時）
+- `development-build.yml`ワークフローを手動実行してDevelopment IPAをビルド
+- ビルドしたIPAをテスト端末にインストールしてアプリを起動するとスキーマが生成される
 
 ### Playwrightブラウザ常時表示ルール
 
@@ -108,18 +112,15 @@ Claude Code は以下のルールに従ってください：
 - HTTPSのみを使用するアプリは暗号化免除対象のため、`false`が適切
 - 参考: https://developer.apple.com/documentation/bundleresources/information-property-list/itsappusesnonexemptencryption
 
-**Fastlaneによる自動配信**:
+**Fastlaneによるアップロード**:
 - `fastlane/Fastfile`の`upload_to_testflight`で以下のパラメータを設定:
-  - `skip_waiting_for_build_processing: false` - ビルド処理完了を待つ（必須）
-  - `skip_submission: false` - 自動提出を有効化
-  - `groups: ["tester"]` - 内部テスターグループ「tester」に自動配信
-  - `distribute_external: false` - 外部テスターには配布しない
-- この設定により、GitHub Actionsからpush時に自動的にテスターグループへ配信される
+  - `skip_waiting_for_build_processing: false` - ビルド処理完了を待つ
+  - `skip_submission: true` - アップロードのみ（配信はApp Store Connect側で管理）
 
 **重要な注意点**:
-- `skip_waiting_for_build_processing: true`の場合、グループへの自動配信は機能しない
-- ビルド処理の完了を待つ必要があるため、CI/CD実行時間が約10-15分増加する
-- 内部テスターグループ「tester」は事前にApp Store Connectで作成済み
+- `groups`パラメータは**外部テスター**用であり、**内部テスターには適用不可**
+- 内部テスターへの自動配信はApp Store Connectで「自動配信」を有効にすることで実現
+- App Store Connect → アプリ → TestFlight → 内部テスト → グループ設定 → 「自動配信」をON
 
 ---
 
