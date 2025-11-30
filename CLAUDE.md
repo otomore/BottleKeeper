@@ -60,24 +60,43 @@ Claude Code は以下のルールに従ってください：
 
 ### 開発環境
 
+**ハードウェア制約（重要）**:
+- **Macなし**: Xcodeを直接使用できない
+- **USBケーブルなし**: 現在のiPhoneをPCに接続できない
+
+**これらの制約による影響**:
+1. デベロッパーモードの有効化が不可能（iOS 16以降、Xcodeに一度も接続したことがないデバイスでは設定に表示されない）
+2. UDIDの取得が不可能（iTunesでの確認にはケーブル接続が必要）
+3. Development IPA（Ad Hoc配布）のインストールが不可能（デバイスUDIDがプロファイルに未登録）
+
+**登録済みデバイス（Apple Developer Portal）**:
+- iPad Pro 9.7（UDID: 34b32a24bea8f3cd695e516a79fe2387912b274e）- 2016年登録
+- iPhone 6 Plus（UDID: 7d835b9f675b80e66ba78807fbfe62c3aca8e0f1）- 2016年登録
+- ※現在使用中のiPhone（iOS 26）は未登録・登録不可
+
+**利用可能な配布方法**:
+- **TestFlight**: デバイス登録なしでインストール可能（推奨）
+- **App Store**: 本番リリース
+
 **Macなし環境での開発フロー**:
 - GitHub Actionsをビルド＆テスト環境として活用
 - プロビジョニングプロファイルはApple Developer Portal（Web）で管理
 - すべての設定変更はファイル編集で実施（Xcode GUI不要）
 
 **CloudKitスキーマ初期化**:
-- スキーマ初期化は**一度だけ**必要（Development環境セットアップ時）
-- `development-build.yml`ワークフローを手動実行してDevelopment IPAをビルド
-- ビルドしたIPAをテスト端末にインストールしてアプリを起動するとスキーマが生成される
+- `initializeCloudKitSchema()`はDevelopment環境でのみ動作
+- **TestFlightビルドはProduction環境を使用**するため、`initializeCloudKitSchema()`は動作しない
+- Production環境では、`NSPersistentCloudKitContainer`がデータ保存時に**自動的にスキーマを生成**する
+- 参考: [Stack Overflow - TestFlight with CloudKit development environment](https://stackoverflow.com/questions/26790086/using-testflight-with-cloudkit-development-environment)
 
 ### Playwrightブラウザ常時表示ルール
 
 **開発作業開始時は、以下のページをPlaywrightブラウザで開いておくこと**:
 
-1. **CloudKit Dashboard** (Development環境)
+1. **CloudKit Dashboard** (Production環境)
    - URL: https://icloud.developer.apple.com/dashboard/
-   - Container: `iCloud.com.bottlekeep.whiskey.v3`
-   - Environment: `Development` → `Production`（段階に応じて切り替え）
+   - Container: `iCloud.com.bottlekeep.whiskey.v4`
+   - Environment: `Production`（TestFlightはProduction環境を使用）
    - 用途: スキーマ確認、レコードタイプ確認、ログ確認
 
 2. **Apple Developer Portal - CloudKit Containers**
@@ -111,9 +130,9 @@ Claude Code は以下のルールに従ってください：
 
 ### 現在のCloudKitコンテナ
 
-- **Container ID**: `iCloud.com.bottlekeep.whiskey.v3`
+- **Container ID**: `iCloud.com.bottlekeep.whiskey.v4`
 - **Team ID**: `B3QHWZX47Z`
-- **環境**: Development（初期スキーマ生成中）→ Production（デプロイ予定）
+- **環境**: Production（TestFlightは常にProduction環境を使用）
 
 ### TestFlight自動配信の設定
 

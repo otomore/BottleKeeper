@@ -175,9 +175,12 @@ class CoreDataManager: ObservableObject {
                 self?.log("CloudKit options: \(cloudKitStatus)")
 
                 // ストアロード完了後にスキーマ初期化を試行
-                // 注意: 通常は#if DEBUGで囲むが、TestFlightでスキーマ初期化するため一時的に解除
-                // スキーマ初期化完了後に#if DEBUGを復元すること
+                // 注意: initializeCloudKitSchema()はDevelopment環境でのみ動作
+                // TestFlightはProduction環境を使用するため、スキーマ初期化は不要
+                // NSPersistentCloudKitContainerがデータ保存時に自動的にスキーマを生成する
+                #if DEBUG
                 self?.attemptSchemaInitializationIfNeeded()
+                #endif
             }
         }
     }
@@ -409,8 +412,8 @@ extension CoreDataManager {
             return
         }
 
-        log("🔄 Initializing CloudKit schema (Development environment)...")
-        log("ℹ️ This creates record types in CloudKit Development database")
+        log("🔄 Initializing CloudKit schema...")
+        log("ℹ️ This creates record types in CloudKit database")
 
         guard isCloudSyncAvailable else {
             let error = NSError(
@@ -425,7 +428,7 @@ extension CoreDataManager {
         // スキーマ初期化を実行
         do {
             try container.initializeCloudKitSchema(options: [])
-            log("✅ CloudKit schema initialized successfully in Development")
+            log("✅ CloudKit schema initialized successfully")
             log("✅ CD_Bottle, CD_WishlistItem, CD_DrinkingLog, CD_BottlePhoto record types created")
 
             UserDefaults.standard.cloudKitSchemaInitialized = true
