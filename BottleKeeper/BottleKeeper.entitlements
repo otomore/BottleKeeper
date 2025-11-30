@@ -5,10 +5,10 @@
 	<key>aps-environment</key>
 	<string>production</string>
 	<key>com.apple.developer.icloud-container-environment</key>
-	<string>Production</string>
+	<string>Development</string>
 	<key>com.apple.developer.icloud-container-identifiers</key>
 	<array>
-		<string>iCloud.com.bottlekeep.whiskey.v3</string>
+		<string>iCloud.com.bottlekeep.whiskey.v4</string>
 	</array>
 	<key>com.apple.developer.icloud-services</key>
 	<array>

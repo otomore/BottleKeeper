@@ -6,7 +6,7 @@ import CloudKit
 
 private enum CoreDataConstants {
     static let containerName = "BottleKeeper"
-    static let cloudKitContainerIdentifier = "iCloud.com.bottlekeep.whiskey.v3"
+    static let cloudKitContainerIdentifier = "iCloud.com.bottlekeep.whiskey.v4"
     static let maxLogCount = 100
     static let previewSampleCount = 5
 
@@ -174,10 +174,10 @@ class CoreDataManager: ObservableObject {
                 let cloudKitStatus = storeDescription.cloudKitContainerOptions != nil ? "Enabled" : "Disabled"
                 self?.log("CloudKit options: \(cloudKitStatus)")
 
-                // ストアロード完了後にスキーマ初期化を試行（一度だけ）
-                // 新しいCloudKitコンテナ(v3)のスキーマを初期化するため、一時的にRELEASEでも実行
-                // TODO: スキーマがProductionにデプロイされたら、#if DEBUGガードを復活させる
+                // ストアロード完了後にスキーマ初期化を試行（DEBUGビルドのみ）
+                #if DEBUG
                 self?.attemptSchemaInitializationIfNeeded()
+                #endif
             }
         }
     }
@@ -409,8 +409,8 @@ extension CoreDataManager {
             return
         }
 
-        log("🔄 Initializing CloudKit schema (Production environment)...")
-        log("ℹ️ This creates record types in CloudKit Production database")
+        log("🔄 Initializing CloudKit schema (Development environment)...")
+        log("ℹ️ This creates record types in CloudKit Development database")
 
         guard isCloudSyncAvailable else {
             let error = NSError(
@@ -425,7 +425,7 @@ extension CoreDataManager {
         // スキーマ初期化を実行
         do {
             try container.initializeCloudKitSchema(options: [])
-            log("✅ CloudKit schema initialized successfully in Production")
+            log("✅ CloudKit schema initialized successfully in Development")
             log("✅ CD_Bottle, CD_WishlistItem, CD_DrinkingLog, CD_BottlePhoto record types created")
 
             UserDefaults.standard.cloudKitSchemaInitialized = true
