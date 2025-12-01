@@ -139,7 +139,12 @@ SECRET_INFO.md
 
 # MCPサーバー関連（ローカル開発ツール）
 serena/
+.serena/
 .playwright-mcp/
 
 # プロビジョニングプロファイル（個人の証明書）
 *.mobileprovision
+
+# プロジェクトリセット時の除外（次回作り直し）
+CLAUDE.md
+export/

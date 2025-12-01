@@ -2,6 +2,15 @@
 
 このプロジェクトでは、Claude Codeとのすべてのやり取りを日本語で行います。
 
+## プロジェクト知識ベース
+
+以下のファイルにプロジェクトの重要な知見が記載されている。必要に応じて参照すること。
+
+@export/claude-docs/project-overview.md
+@export/claude-docs/constraints.md
+@export/claude-docs/lessons-learned.md
+@export/claude-docs/working-assets.md
+
 ## 言語設定
 
 - **使用言語**: 日本語

@@ -1,4 +1,0 @@
-# Appfile
-# アプリケーションの基本設定
-
-app_identifier("com.bottlekeep.whiskey") # Bundle ID
